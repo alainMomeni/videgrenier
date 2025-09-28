@@ -60,12 +60,12 @@ const Home = ({ onAddToCart }: HomeProps) => {
   }, []);
 
   const categories = [
-    { name: 'Men\'s Fashion', image: '/assets/categorie1.png', alt: 'Mannequin homme portant un long manteau marron' },
-    { name: 'Handbags', image: '/assets/categorie2.png', alt: 'Sac à main en cuir marron de luxe' },
-    { name: 'Graphic Tees', image: '/assets/categorie3.png', alt: 'T-shirt blanc avec un portrait graphique' },
-    { name: 'Jewelry', image: '/assets/categorie4.png', alt: 'Collection de bijoux vintage en argent et pierres précieuses' },
-    { name: 'Sandals', image: '/assets/categorie5.png', alt: 'Paire de sandales dorées pour femme' },
-    { name: 'Sneakers', image: '/assets/categorie6.png', alt: 'Paire de baskets blanches classiques' }
+    { name: 'Men\'s Fashion', image: '/assets/categorie1.jpg', alt: 'Mannequin homme portant un long manteau marron' },
+    { name: 'Handbags', image: '/assets/categorie2.jpg', alt: 'Sac à main en cuir marron de luxe' },
+    { name: 'Graphic Tees', image: '/assets/categorie3.jpg', alt: 'T-shirt blanc avec un portrait graphique' },
+    { name: 'Jewelry', image: '/assets/categorie4.jpg', alt: 'Collection de bijoux vintage en argent et pierres précieuses' },
+    { name: 'Sandals', image: '/assets/categorie5.jpg', alt: 'Paire de sandales dorées pour femme' },
+    { name: 'Sneakers', image: '/assets/categorie6.jpg', alt: 'Paire de baskets blanches classiques' }
   ];
 
   const testimonials = [

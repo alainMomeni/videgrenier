@@ -6,7 +6,7 @@ export const allProducts = [
     name: 'Sac Classique Cuir Blanc', 
     price: 220, 
     category: 'Handbags', 
-    image: '/assets/vente/handbags2.png', 
+    image: '/assets/vente/handbags2.jpg', 
     stock: 15, 
     description: 'Un sac intemporel en cuir blanc véritable, parfait pour toutes les occasions. Finitions faites à la main et doublure en satin.' 
   },
@@ -15,7 +15,7 @@ export const allProducts = [
     name: 'Sac à Main "Toffee"', 
     price: 185, 
     category: 'Handbags', 
-    image: '/assets/vente/handbags3.png', 
+    image: '/assets/vente/handbags3.jpg', 
     stock: 8, 
     description: 'Élégance et fonctionnalité se rencontrent dans ce sac à main couleur caramel, doté de multiples compartiments intérieurs.' 
   },
@@ -24,7 +24,7 @@ export const allProducts = [
     name: 'Parure Diamant "Éclat"', 
     price: 1250, 
     category: 'Jewelry', 
-    image: '/assets/vente/jewelry1.png', 
+    image: '/assets/vente/jewelry1.jpg', 
     stock: 3, 
     description: 'Une parure éblouissante en argent sterling et diamants certifiés, idéale pour les grands événements.' 
   },
@@ -33,7 +33,7 @@ export const allProducts = [
     name: 'Bague Solitaire Argent', 
     price: 450, 
     category: 'Jewelry', 
-    image: '/assets/vente/jewelry2.png', 
+    image: '/assets/vente/jewelry2.jpg', 
     stock: 12, 
     description: 'Une bague solitaire classique qui capture la lumière de manière spectaculaire, symbole d\'élégance pure.' 
   },
@@ -42,7 +42,7 @@ export const allProducts = [
     name: 'Veste en Cuir "Aviateur"', 
     price: 350, 
     category: 'Men\'s Fashion', 
-    image: '/assets/vente/menfashion1.png', 
+    image: '/assets/vente/menfashion1.jpg', 
     stock: 25, 
     description: 'Inspirée des vestes d\'aviateur classiques, cette pièce en cuir robuste est un incontournable de toute garde-robe masculine.' 
   },
@@ -51,7 +51,7 @@ export const allProducts = [
     name: 'Sandales en Cuir "Sahara"', 
     price: 89, 
     category: 'Sandals', 
-    image: '/assets/vente/sandals1.png', 
+    image: '/assets/vente/sandals1.jpg', 
     stock: 30, 
     description: 'Des sandales confortables et stylées, fabriquées à partir de cuir souple pour vous accompagner tout l\'été.' 
   },
@@ -60,7 +60,7 @@ export const allProducts = [
     name: 'Nu-pieds "Riviera"', 
     price: 75, 
     category: 'Sandals', 
-    image: '/assets/vente/sandals2.png', 
+    image: '/assets/vente/sandals2.jpg', 
     stock: 18, 
     description: 'Légères et aérées, ces sandales nu-pieds sont parfaites pour une promenade en bord de mer ou une journée en ville.' 
   },
@@ -69,7 +69,7 @@ export const allProducts = [
     name: 'Sneakers Basses Blanches', 
     price: 110, 
     category: 'Sneakers', 
-    image: '/assets/vente/sneakers1.png', 
+    image: '/assets/vente/sneakers1.jpg', 
     stock: 45, 
     description: 'Un classique indémodable. Ces sneakers blanches épurées s\'associent avec n\'importe quelle tenue.' 
   },
@@ -78,7 +78,7 @@ export const allProducts = [
     name: 'Sneakers Montantes Bleues', 
     price: 130, 
     category: 'Sneakers', 
-    image: '/assets/vente/sneakers2.png', 
+    image: '/assets/vente/sneakers2.jpg', 
     stock: 22, 
     description: 'Affirmez votre style avec ces baskets montantes d\'un bleu profond, alliant confort et look vintage.' 
   },
@@ -87,7 +87,7 @@ export const allProducts = [
     name: 'T-shirt Uni Bleu Marine', 
     price: 45, 
     category: 'T-Shirts', 
-    image: '/assets/vente/tees1.png', 
+    image: '/assets/vente/tees1.jpg', 
     stock: 50, 
     description: 'Un t-shirt essentiel de haute qualité, fabriqué en coton biologique doux et respirant.' 
   },
@@ -96,7 +96,7 @@ export const allProducts = [
     name: 'T-shirt "Soleil" Jaune', 
     price: 49, 
     category: 'T-Shirts', 
-    image: '/assets/vente/tees2.png', 
+    image: '/assets/vente/tees2.jpg', 
     stock: 35, 
     description: 'Apportez une touche de couleur à votre journée avec ce t-shirt jaune vif, orné d\'un logo discret.' 
   },
@@ -105,7 +105,7 @@ export const allProducts = [
     name: 'Ceinture en Cuir Tressé', 
     price: 65, 
     category: 'Men\'s Fashion', 
-    image: '/assets/vente/menfashion1.png', 
+    image: '/assets/vente/menfashion1.jpg', 
     stock: 28, 
     description: 'Une ceinture polyvalente en cuir tressé qui ajoute une touche de texture et de sophistication à votre tenue.' 
   },
