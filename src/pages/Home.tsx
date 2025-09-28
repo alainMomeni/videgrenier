@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion'; 
 import { Search, ShoppingCart, Gift, DollarSign, Leaf, MessageSquare, Instagram, Facebook, Twitter } from 'lucide-react';
 
-
 type HomeProps = {
   onAddToCart: (product: any, quantity: number) => void;
 };
@@ -10,7 +9,6 @@ type HomeProps = {
 const Home = ({ onAddToCart }: HomeProps) => {
 
   useEffect(() => {
-    // --- MODIFICATION ICI ---
     document.title = "Vide Grenier Kamer - Vêtements Vintage & Seconde Main";
     
     const metaDescription = document.querySelector('meta[name="description"]') || document.createElement('meta');
@@ -86,7 +84,8 @@ const Home = ({ onAddToCart }: HomeProps) => {
   return (
     <main>
       <section className="relative bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.png')` }} aria-label="Section principale">
-        <div className="container mx-auto px-4">
+        {/* CORRECTION: Ajout de padding horizontal cohérent */}
+        <div className="container mx-auto px-8 lg:px-12 xl:px-16">
           <div className="flex items-center min-h-[500px] md:min-h-[600px]">
             <div className="md:w-1/2 lg:w-5/12 py-16">
               <div className="space-y-6">
@@ -119,7 +118,8 @@ const Home = ({ onAddToCart }: HomeProps) => {
         transition={{ duration: 0.8, ease: "easeOut" }}
         aria-label="Catégories de vêtements"
       >
-        <div className="container mx-auto px-4">
+        {/* CORRECTION: Ajout de padding horizontal cohérent */}
+        <div className="container mx-auto px-8 lg:px-12 xl:px-16">
           <h2 className="text-center text-3xl font-serif font-bold text-[#2a363b] mb-12">Featured Categories</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
             {categories.map((category, index) => (
@@ -147,7 +147,8 @@ const Home = ({ onAddToCart }: HomeProps) => {
         transition={{ duration: 0.8, ease: "easeOut" }}
         aria-label="Comment ça marche"
       >
-        <div className="container mx-auto px-4">
+        {/* CORRECTION: Ajout de padding horizontal cohérent */}
+        <div className="container mx-auto px-8 lg:px-12 xl:px-16">
           <h2 className="text-center text-3xl font-serif font-bold text-[#2a363b] mb-20">How it Works</h2>
           <div className="flex flex-col md:flex-row items-center justify-center gap-y-8 md:gap-x-12 lg:gap-x-20">
             <div className="flex flex-col items-center text-center w-48 group">
@@ -182,7 +183,8 @@ const Home = ({ onAddToCart }: HomeProps) => {
         transition={{ duration: 0.8, ease: "easeOut" }}
         aria-label="Pourquoi choisir Vide Grenier Kamer et témoignages"
       >
-        <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-x-20 gap-y-16">
+        {/* CORRECTION: Ajout de padding horizontal cohérent */}
+        <div className="container mx-auto px-8 lg:px-12 xl:px-16 grid lg:grid-cols-2 gap-x-20 gap-y-16">
           <div className="flex flex-col justify-between">
             <div>
               <h2 className="text-3xl font-serif font-bold text-[#2a363b] mb-8">Why Choose Vide Grenier Kamer?</h2>

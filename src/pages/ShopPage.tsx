@@ -1,7 +1,5 @@
-// src/pages/ShopPage.js
-
 import { useState, useMemo, type SetStateAction } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -23,10 +21,19 @@ type Product = {
 const ProductCard = ({ product }: { product: Product }) => (
   <Link to={`/product/${product.id}`}>
     <motion.div 
-      className="group text-left" // cursor-pointer est enlevé
-      variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+      className="group text-left"
+      variants={{ 
+        hidden: { y: 20, opacity: 0 }, 
+        visible: { 
+          y: 0, 
+          opacity: 1,
+          transition: {
+            duration: 0.5,
+            ease: "easeOut" as const
+          }
+        } 
+      }}
     >
-      {/* Le reste de la carte ne change pas */}
       <div className="overflow-hidden rounded-md relative">
         <img 
           src={product.image} 
@@ -43,7 +50,6 @@ const ProductCard = ({ product }: { product: Product }) => (
     </motion.div>
   </Link>
 );
-
 
 // --- Composant Principal de la Page Shop ---
 const ShopPage = () => {
@@ -87,9 +93,14 @@ const ShopPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    visible: { 
+      opacity: 1, 
+      transition: { 
+        staggerChildren: 0.1 
+      } 
+    }
   };
 
   return (
@@ -99,7 +110,8 @@ const ShopPage = () => {
       exit={{ opacity: 0 }}
       className="bg-[#f3efe7]"
     >
-      <div className="container mx-auto px-4 py-16">
+      {/* CORRECTION: Ajout de padding horizontal cohérent */}
+      <div className="container mx-auto px-8 lg:px-12 xl:px-16 py-16">
         <h1 className="text-center text-4xl font-serif font-bold text-[#2a363b] mb-4">Shop All</h1>
         <p className="text-center text-gray-600 font-serif mb-12">Discover our curated collection of vintage and pre-loved items.</p>
 

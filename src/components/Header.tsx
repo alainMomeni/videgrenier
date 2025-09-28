@@ -24,7 +24,6 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
     navigate('/');
   };
   
-  // CORRECTION: Utiliser 'click' au lieu de 'mousedown'
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
@@ -32,7 +31,6 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
       }
     };
     
-    // Petit délai pour permettre aux clics sur les liens de s'exécuter
     const handleClick = (e: MouseEvent) => {
       setTimeout(() => handleClickOutside(e), 0);
     };
@@ -99,14 +97,15 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
   return (
     <>
       <header className="bg-[#f3efe7] border-b border-[#dcd6c9] sticky top-0 z-40">
-        <div className="container mx-auto px-4">
+        {/* CORRECTION: Ajout de padding horizontal plus important (px-8 lg:px-12 xl:px-16) */}
+        <div className="container mx-auto px-8 lg:px-12 xl:px-16">
           <div className="flex items-center justify-between h-20">
             <Link to="/" className="flex-shrink-0" aria-label="Logo Vide Grenier Kamer - Page d'accueil">
               <img src="/assets/logo.png" alt="Vide Grenier Kamer Logo" className="h-26 w-auto"/>
             </Link>
             
-            <div className="hidden lg:flex items-center justify-end space-x-8">
-              <nav className="flex items-center space-x-8" role="navigation">
+            <div className="hidden lg:flex items-center justify-end space-x-6 xl:space-x-8">
+              <nav className="flex items-center space-x-6 xl:space-x-8" role="navigation">
                 <Link to="/shop" className="text-gray-700 relative group">
                   <span>Shop All</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2a363b] transition-all duration-300 group-hover:w-full"></span>
@@ -125,12 +124,12 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
                 </Link>
               </nav>
               
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 xl:space-x-4">
                 <div className="relative items-center">
                   <input 
                     id="search" 
                     type="search" 
-                    className="w-64 xl:w-80 bg-white border border-[#dcd6c9] rounded-md py-1.5 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#c0b8a8]" 
+                    className="w-56 xl:w-72 2xl:w-80 bg-white border border-[#dcd6c9] rounded-md py-1.5 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#c0b8a8]" 
                     placeholder="Rechercher..."
                   />
                   <Search className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
@@ -175,7 +174,7 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
               </div>
             </div>
             
-            {/* Menu mobile - même logique appliquée */}
+            {/* Menu mobile */}
             <div className="lg:hidden flex items-center space-x-2">
               <div className="relative">
                 {user ? (
@@ -226,7 +225,8 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
       {/* Menu mobile étendu */}
       {isMainMenuOpen && (
         <nav className="lg:hidden bg-[#f3efe7] border-t border-[#dcd6c9] shadow-sm">
-          <div className="px-4 py-4 space-y-4">
+          {/* CORRECTION: Ajout de padding cohérent */}
+          <div className="px-8 py-4 space-y-4">
             <div className="relative">
               <input 
                 id="search-mobile" 

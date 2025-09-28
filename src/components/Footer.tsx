@@ -10,10 +10,10 @@ const Footer = () => {
       transition={{ duration: 1.0, ease: "easeOut" }}
       role="contentinfo"
     >
-      <div className="container mx-auto px-4">
+      {/* CORRECTION: Ajout de padding horizontal cohérent */}
+      <div className="container mx-auto px-8 lg:px-12 xl:px-16">
         <div className="py-12 border-t border-[#dcd6c9]">
           <nav 
-            // --- AMÉLIORATION ICI ---
             className="flex flex-col md:flex-row justify-center text-center md:text-left gap-y-10 md:gap-x-24 mb-10" 
             aria-label="Liens du footer"
           >
