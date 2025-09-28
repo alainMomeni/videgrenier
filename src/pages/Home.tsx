@@ -83,7 +83,7 @@ const Home = ({ onAddToCart }: HomeProps) => {
 
   return (
     <main>
-      <section className="relative bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.png')` }} aria-label="Section principale">
+      <section className="relative bg-cover bg-center" style={{ backgroundImage: `url('/assets/hero.jpg')` }} aria-label="Section principale">
         {/* CORRECTION: Ajout de padding horizontal cohérent */}
         <div className="container mx-auto px-8 lg:px-12 xl:px-16">
           <div className="flex items-center min-h-[500px] md:min-h-[600px]">
