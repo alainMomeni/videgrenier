@@ -58,7 +58,7 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
         <div className="border-t border-[#dcd6c9] my-1"></div>
         
         <Link 
-          to="/profile" 
+          to="/profil" 
           onClick={(e) => {
             e.stopPropagation();
             closeAllMenus();
@@ -116,7 +116,7 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
                   <span>About Us</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2a363b] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
-                <Link to="/blog" className="text-gray-700 relative group">
+                <Link to="/contact" className="text-gray-700 relative group">
                   <span>Contact Us</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2a363b] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
@@ -226,11 +226,8 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
             <Link to="/about" className="block text-gray-700 hover:text-black hover:bg-[#e7e2d9] px-3 py-2 rounded-md font-medium" onClick={closeAllMenus}>
               About Us
             </Link>
-            <Link to="/blog" className="block text-gray-700 hover:text-black hover:bg-[#e7e2d9] px-3 py-2 rounded-md font-medium" onClick={closeAllMenus}>
-              Blog
-            </Link>
-            <Link to="/partner" className="block text-gray-700 hover:text-black hover:bg-[#e7e2d9] px-3 py-2 rounded-md font-medium" onClick={closeAllMenus}>
-              Become a Partner
+            <Link to="/contact" className="block text-gray-700 hover:text-black hover:bg-[#e7e2d9] px-3 py-2 rounded-md font-medium" onClick={closeAllMenus}>
+              Contact Us
             </Link>
           </div>
         </nav>

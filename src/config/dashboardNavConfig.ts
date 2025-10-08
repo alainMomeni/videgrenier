@@ -1,5 +1,5 @@
 // frontend/src/config/dashboardNavConfig.ts
-import { LayoutDashboard, ShoppingBag, Users, Settings, BarChart2, Archive, Star, Truck, Mail } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, BarChart2, Archive, Star, Truck, Mail } from 'lucide-react';
 
 export type NavLink = {
   path: string;
@@ -17,7 +17,6 @@ export const dashboardNavConfig: { [key: string]: NavLink[] } = {
     { path: '/admin/users', label: 'Manage Users', icon: Users },
     { path: '/admin/reviews', label: 'Customer Reviews', icon: Star },
     { path: '/admin/newsletters', label: 'Newsletter', icon: Mail },
-    { path: '/admin/settings', label: 'Settings', icon: Settings },
   ],
   seller: [
     { path: '/admin', label: 'Overview', icon: LayoutDashboard },
@@ -26,6 +25,5 @@ export const dashboardNavConfig: { [key: string]: NavLink[] } = {
     { path: '/admin/my-supply', label: 'My Supplies', icon: Truck }, // AJOUTÉ
     { path: '/admin/my-sales', label: 'My Sales', icon: BarChart2 },
     { path: '/admin/my-reviews', label: 'My Reviews', icon: Star },
-    { path: '/admin/settings', label: 'Settings', icon: Settings },
   ],
 };

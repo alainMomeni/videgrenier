@@ -18,6 +18,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import ProfilManager from './pages/ProfilManager';
 
 // --- IMPORTS POUR LES PAGES DU DASHBOARD ---
 import AdminProducts from './pages/admin/AdminProducts';
@@ -133,6 +134,7 @@ const AppLayout = () => {
           <Route path="/order-success" element={<OrderSuccessPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/about" element={<About />} />
+          <Route path="/profil" element={<ProfilManager />} />
           <Route path="/login" element={<LoginPage />} /> 
           <Route path="/signup" element={<SignupPage />} />
         </Routes>
