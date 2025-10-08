@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { User, Mail, Lock } from 'lucide-react';
 import React from 'react';
 
-const AdminSettings = () => {
+const ProfilManager = () => {
   const auth = useAuth();
   
   // Dans une vraie application, les données initiales viendraient de l'utilisateur connecté
@@ -191,4 +191,4 @@ const AdminSettings = () => {
   );
 };
 
-export default AdminSettings;
+export default ProfilManager;

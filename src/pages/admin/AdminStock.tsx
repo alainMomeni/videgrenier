@@ -1,59 +1,105 @@
+// src/pages/admin/AdminStock.tsx
+
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { allProducts as initialProductsRaw } from '../../data/products';
+import { Search, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { stockAPI } from '../../services/api';
+import toast from 'react-hot-toast';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
-type ProductStock = {
-  id: number;
-  name: string;
-  image: string;
-  stock: number;
-  soldToday: number; // FIX: Retirer le ? pour forcer une valeur
+type StockRecordWithUser = {
+  id_stock: number;
+  date: string;
+  id_produit: number;
+  id_user?: number;
+  nom_produit: string;
+  quantite_ouverture_mois: number;
+  quantite_vendu_mois: number;
+  stock_actuel: number;
+  quantite_approvisionner: number;
+  valeur_stock: number;
+  prix_unitaire?: number;
 };
 
-// Composant pour l'indicateur de stock visuel
 const StockIndicator = ({ stock }: { stock: number }) => {
   let bgColor = 'bg-green-500';
-  if (stock <= 0) bgColor = 'bg-gray-400';
-  else if (stock < 10) bgColor = 'bg-red-500';
-  else if (stock < 25) bgColor = 'bg-yellow-500';
-  return <span className={`inline-block w-3 h-3 ${bgColor} rounded-full`} title={`Stock: ${stock}`}></span>;
+  let textColor = 'text-green-700';
+  if (stock <= 0) {
+    bgColor = 'bg-gray-400';
+    textColor = 'text-gray-600';
+  } else if (stock < 10) {
+    bgColor = 'bg-red-500';
+    textColor = 'text-red-700';
+  } else if (stock < 25) {
+    bgColor = 'bg-yellow-500';
+    textColor = 'text-yellow-700';
+  }
+  
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <span className={`inline-block w-3 h-3 ${bgColor} rounded-full`} />
+      <span className={`font-semibold ${textColor}`}>{stock}</span>
+    </div>
+  );
 };
 
 const STOCK_ITEMS_PER_PAGE = 10;
 
-const AdminStock = () => {
-  // FIX: Ajouter soldToday avec une valeur par défaut de 0 pour chaque produit
-  const initialProducts = useMemo(() => 
-    initialProductsRaw.map(p => ({ 
-      id: p.id,
-      name: p.name,
-      image: p.image,
-      stock: p.stock,
-      soldToday: 0 // Valeur par défaut car elle n'existe pas dans products.ts
-    })), 
-    []
-  );
+const AdminStock = ({ isSellerView = false }) => {
+  const auth = useAuth();
+  const user = auth?.user;
 
-  const [products, setProducts] = useState<ProductStock[]>(initialProducts);
+  const [stocks, setStocks] = useState<StockRecordWithUser[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const filteredProducts = useMemo(() => 
-    products.filter(product => 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [products, searchTerm]);
+  useEffect(() => {
+    fetchStockRecords();
+  }, [selectedDate, isSellerView, user]);
+
+  const fetchStockRecords = async () => {
+    try {
+      setLoading(true);
+      const params = {
+        month: selectedDate.getMonth() + 1,
+        year: selectedDate.getFullYear(),
+        ...(isSellerView && user ? { userId: user.id } : {})
+      };
+      
+      const response = await stockAPI.getAll(params);
+      setStocks(response.data);
+    } catch (error) {
+      console.error('Error fetching stock records:', error);
+      toast.error('Failed to load stock records');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredAndJoinedData = useMemo(() => {
+    if (searchTerm) {
+      return stocks.filter(stock => 
+        stock.nom_produit.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        stock.id_produit.toString().includes(searchTerm)
+      );
+    }
+    return stocks;
+  }, [stocks, searchTerm]);
   
-  const totalPages = Math.ceil(filteredProducts.length / STOCK_ITEMS_PER_PAGE);
-  const paginatedProducts = useMemo(() => 
-    filteredProducts.slice(
+  const totalPages = Math.ceil(filteredAndJoinedData.length / STOCK_ITEMS_PER_PAGE);
+  const paginatedStocks = useMemo(() => 
+    filteredAndJoinedData.slice(
       (currentPage - 1) * STOCK_ITEMS_PER_PAGE,
       currentPage * STOCK_ITEMS_PER_PAGE
-    ), [filteredProducts, currentPage]);
+    ), [filteredAndJoinedData, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, selectedDate]);
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
@@ -61,20 +107,62 @@ const AdminStock = () => {
     }
   };
 
-  const handleStockUpdate = (productId: number, newStock: number) => {
-    // Dans une vraie app, on ferait un appel API pour mettre à jour la BDD
-    const updatedStock = Math.max(0, newStock); // Empêcher les stocks négatifs
-    setProducts(products.map(p => p.id === productId ? { ...p, stock: updatedStock } : p));
+  const handleStockUpdate = async (stockId: number, newStock: number) => {
+    try {
+      const updatedStock = Math.max(0, newStock);
+      const stockRecord = stocks.find(s => s.id_stock === stockId);
+      
+      await stockAPI.updateStock(stockId, {
+        stock_actuel: updatedStock,
+        prix_unitaire: stockRecord?.prix_unitaire
+      });
+      
+      toast.success('Stock updated successfully');
+      fetchStockRecords();
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      toast.error('Failed to update stock');
+    }
   };
   
   const firstItemIndex = (currentPage - 1) * STOCK_ITEMS_PER_PAGE + 1;
-  const lastItemIndex = Math.min(currentPage * STOCK_ITEMS_PER_PAGE, filteredProducts.length);
+  const lastItemIndex = Math.min(currentPage * STOCK_ITEMS_PER_PAGE, filteredAndJoinedData.length);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2a363b] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading stock records...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-      <div className="mb-8">
-        <h1 className="text-3xl lg:text-4xl font-serif font-bold text-[#2a363b]">Stock Management</h1>
-        <p className="text-gray-600 mt-1">View and update product inventory levels.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl lg:text-4xl font-serif font-bold text-[#2a363b]">
+            {isSellerView ? 'My Stock' : 'Stock Management'}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {isSellerView ? 'View and update your product inventory levels.' : 'View historical and current inventory levels by month.'}
+          </p>
+        </div>
+        <div className="relative">
+           <label htmlFor="month-picker" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">Select Month</label>
+           <div className="relative">
+              <DatePicker
+                selected={selectedDate}
+                onChange={(date: Date | null) => date && setSelectedDate(date)}
+                dateFormat="MMMM yyyy"
+                showMonthYearPicker
+                className="w-full py-2 pl-10 pr-4 bg-white border border-[#dcd6c9] rounded-md focus:ring-2 focus:ring-[#c0b8a8] focus:outline-none"
+              />
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+           </div>
+        </div>
       </div>
 
       <div className="mb-6 relative">
@@ -82,70 +170,59 @@ const AdminStock = () => {
         <input 
           id="search-stock"
           type="text"
-          placeholder="Search product by name..."
+          placeholder="Search product by name or ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full py-2 pl-10 pr-4 bg-white border border-[#dcd6c9] rounded-md focus:ring-2 focus:ring-[#c0b8a8] focus:outline-none"
+          className="w-full py-2 pl-10 pr-4 bg-white border border-[#dcd6c9] rounded-md focus:ring-2 focus:ring-[#c0b8a8] focus:outline-none text-sm"
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
       </div>
 
-      <div className="bg-[#fcfaf7] border border-[#dcd6c9] rounded-lg shadow-sm overflow-x-auto">
-        <table className="min-w-full divide-y divide-[#dcd6c9]">
-          <thead className="bg-[#f3efe7]">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Product</th>
-              <th className="px-6 py-4 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Opening Stock</th>
-              <th className="px-6 py-4 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Sold Today</th>
-              <th className="px-6 py-4 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Current Stock</th>
-              <th className="px-6 py-4 text-right text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Quick Update</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-[#e7e2d9]">
-            {paginatedProducts.map(product => {
-              const openingStock = product.stock + product.soldToday;
-              return (
-                <tr key={product.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-11 w-11">
-                        <img className="h-11 w-11 rounded-md object-cover" src={product.image} alt={product.name} />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-semibold text-gray-900">{product.name}</div>
-                      </div>
-                    </div>
+      <div className="bg-[#fcfaf7] border border-[#dcd6c9] rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-[#dcd6c9]">
+            <thead className="bg-[#f3efe7]">
+              <tr>
+                <th className="px-3 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase">Product</th>
+                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden sm:table-cell">Opening</th>
+                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase">Sold</th>
+                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden lg:table-cell">Restocked</th>
+                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase">Current Stock</th>
+                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden md:table-cell">Stock Value</th>
+                <th className="px-3 py-3 text-right text-xs font-serif font-semibold text-[#2a363b] uppercase">Quick Update</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-[#e7e2d9]">
+              {paginatedStocks.map(stock => (
+                <tr key={stock.id_stock} className="hover:bg-gray-50">
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-gray-900">{stock.nom_produit}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-600">{openingStock}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-600">{product.soldToday}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 font-medium">
-                    <div className="flex items-center justify-center gap-2">
-                      <StockIndicator stock={product.stock} />
-                      {product.stock}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <div className="flex items-center justify-end">
-                      <input
-                        type="number"
-                        defaultValue={product.stock}
-                        onBlur={(e) => handleStockUpdate(product.id, parseInt(e.target.value, 10))}
-                        className="w-20 text-center border border-[#dcd6c9] rounded-md py-1 focus:ring-2 focus:ring-[#c0b8a8] focus:outline-none"
-                      />
-                    </div>
+                  <td className="px-3 py-3 text-center text-sm text-gray-600 hidden sm:table-cell">{stock.quantite_ouverture_mois}</td>
+                  <td className="px-3 py-3 text-center"><span className="text-sm font-medium text-orange-600">{stock.quantite_vendu_mois}</span></td>
+                  <td className="px-3 py-3 text-center text-sm text-green-600 font-medium hidden lg:table-cell">{stock.quantite_approvisionner > 0 ? `+${stock.quantite_approvisionner}` : '-'}</td>
+                  <td className="px-3 py-3 text-center"><StockIndicator stock={stock.stock_actuel} /></td>
+                  <td className="px-3 py-3 text-center font-semibold text-gray-800 hidden md:table-cell">${Number(stock.valeur_stock).toLocaleString()}</td>
+                  <td className="px-3 py-3 text-right">
+                    <input
+                      type="number"
+                      defaultValue={stock.stock_actuel}
+                      onBlur={(e) => handleStockUpdate(stock.id_stock, parseInt(e.target.value, 10))}
+                      className="w-20 text-center border border-[#dcd6c9] rounded-md py-1 px-2 focus:ring-2 focus:ring-[#c0b8a8] focus:outline-none text-sm"
+                    />
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <p className="text-sm text-gray-600">
-          Showing <span className="font-semibold">{filteredProducts.length > 0 ? firstItemIndex : 0}</span>-
+          Showing <span className="font-semibold">{filteredAndJoinedData.length > 0 ? firstItemIndex : 0}</span>-
           <span className="font-semibold">{lastItemIndex}</span> of{' '}
-          <span className="font-semibold">{filteredProducts.length}</span> products
+          <span className="font-semibold">{filteredAndJoinedData.length}</span> items
         </p>
         
         {totalPages > 1 && (

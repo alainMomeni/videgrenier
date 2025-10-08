@@ -1,8 +1,10 @@
+// frontend/src/components/Header.tsx
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ConfirmDialog } from './ConfirmDialog';
+import SearchBar from './SearchBar';
 
 type HeaderProps = {
   cartCount?: number;
@@ -12,6 +14,7 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
   const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  
   const auth = useAuth();
   const user = auth?.user;
   const logout = auth?.logout;
@@ -97,7 +100,6 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
   return (
     <>
       <header className="bg-[#f3efe7] border-b border-[#dcd6c9] sticky top-0 z-40">
-        {/* CORRECTION: Ajout de padding horizontal plus important (px-8 lg:px-12 xl:px-16) */}
         <div className="container mx-auto px-8 lg:px-12 xl:px-16">
           <div className="flex items-center justify-between h-20">
             <Link to="/" className="flex-shrink-0" aria-label="Logo Vide Grenier Kamer - Page d'accueil">
@@ -115,25 +117,14 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2a363b] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 <Link to="/blog" className="text-gray-700 relative group">
-                  <span>Blog</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2a363b] transition-all duration-300 group-hover:w-full"></span>
-                </Link>
-                <Link to="/partner" className="text-gray-700 relative group">
-                  <span>Become a Partner</span>
+                  <span>Contact Us</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#2a363b] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </nav>
               
               <div className="flex items-center space-x-3 xl:space-x-4">
-                <div className="relative items-center">
-                  <input 
-                    id="search" 
-                    type="search" 
-                    className="w-56 xl:w-72 2xl:w-80 bg-white border border-[#dcd6c9] rounded-md py-1.5 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#c0b8a8]" 
-                    placeholder="Rechercher..."
-                  />
-                  <Search className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
-                </div>
+                {/* Barre de recherche avec suggestions */}
+                <SearchBar />
 
                 <div className="relative" ref={profileMenuRef}>
                   {user ? (
@@ -225,17 +216,10 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
       {/* Menu mobile étendu */}
       {isMainMenuOpen && (
         <nav className="lg:hidden bg-[#f3efe7] border-t border-[#dcd6c9] shadow-sm">
-          {/* CORRECTION: Ajout de padding cohérent */}
           <div className="px-8 py-4 space-y-4">
-            <div className="relative">
-              <input 
-                id="search-mobile" 
-                type="search" 
-                className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#c0b8a8]" 
-                placeholder="Rechercher..."
-              />
-              <Search className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
-            </div>
+            {/* Barre de recherche mobile avec suggestions */}
+            <SearchBar isMobile onClose={closeAllMenus} />
+            
             <Link to="/shop" className="block text-gray-700 hover:text-black hover:bg-[#e7e2d9] px-3 py-2 rounded-md font-medium" onClick={closeAllMenus}>
               Shop All
             </Link>

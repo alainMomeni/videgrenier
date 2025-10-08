@@ -1,36 +1,42 @@
-// src/pages/LoginPage.tsx
-
+// frontend/src/pages/LoginPage.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // 1. Importer le hook useAuth
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const auth = useAuth(); // 2. Récupérer le contexte
-  const login = auth?.login; // Vérifier si login existe
-  const navigate = useNavigate(); // Pour rediriger l'utilisateur après connexion
+  const auth = useAuth();
+  const login = auth?.login;
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    
     if (!email || !password) {
       return setError('Please fill in both fields.');
     }
+    
     if (!login) {
       setError('Authentication service unavailable.');
       return;
     }
+    
     try {
       await login({ email, password });
-      navigate('/'); // 3. Rediriger vers la page d'accueil après succès
-    } catch (err) {
-      if (typeof err === 'object' && err !== null && 'response' in err) {
-        // @ts-ignore
-        setError(err.response?.data?.message || 'Failed to log in. Please check your credentials.');
+      navigate('/');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      
+      // Gérer spécifiquement l'erreur de compte bloqué
+      if (err.response?.status === 403 && err.response?.data?.blocked) {
+        setError(err.response.data.message || 'Your account has been blocked.');
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
       } else {
         setError('Failed to log in. Please check your credentials.');
       }
@@ -63,11 +69,8 @@ const LoginPage = () => {
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
             <div className="rounded-md space-y-4">
-              {/* Email Input */}
               <div>
-                <label htmlFor="email" className="sr-only">
-                  Email address
-                </label>
+                <label htmlFor="email" className="sr-only">Email address</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                     <Mail className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -86,11 +89,8 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              {/* Password Input */}
               <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
+                <label htmlFor="password" className="sr-only">Password</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                     <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -111,7 +111,9 @@ const LoginPage = () => {
             </div>
             
             {error && (
-              <p className="text-sm text-red-600 text-center font-serif">{error}</p>
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600 text-center font-serif">{error}</p>
+              </div>
             )}
 
             <div className="flex items-center justify-between">

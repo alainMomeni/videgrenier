@@ -1,3 +1,4 @@
+// frontend/src/App.tsx
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
@@ -13,19 +14,24 @@ import DashboardOverview from './pages/admin/DashboardOverview';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
 // --- IMPORTS POUR LES PAGES DU DASHBOARD ---
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
-import SellerProducts from './pages/admin/SellerProducts';
-import SellerSales from './pages/admin/SellerSales';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminStock from './pages/admin/AdminStock';
 import AdminSupply from './pages/admin/AdminSupply';
 import AdminSales from './pages/admin/AdminSales';
-import AdminReviews from './pages/admin/AdminReviews'; // NOUVEAU
+import AdminReviews from './pages/admin/AdminReviews';
+import AdminNewsletters from './pages/admin/AdminNewsletters';
+import SellerProducts from './pages/seller/SellerProducts';
+import SellerSales from './pages/seller/SellerSales';
+import SellerStock from './pages/seller/SellerStock';
+import SellerSupply from './pages/seller/SellerSupply';
 
 const AppLayout = () => {
   const location = useLocation();
@@ -33,12 +39,17 @@ const AppLayout = () => {
 
   type CartItem = {
     id: string | number;
+    name: string;
+    price: number;
     quantity: number;
+    image: string;
+    category?: string;
     [key: string]: any;
   };
+  
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const handleAddToCart = (product: { [x: string]: any; id: any; quantity?: number; }, quantity: number) => {
+  const handleAddToCart = (product: any, quantity: number) => {
     setCartItems(prevItems => {
       const itemExists = prevItems.find(item => item.id === product.id);
       if (itemExists) {
@@ -61,6 +72,10 @@ const AppLayout = () => {
   const handleRemoveFromCart = (productId: string | number) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
   };
+
+  const handleClearCart = () => {
+    setCartItems([]);
+  };
   
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -77,12 +92,15 @@ const AppLayout = () => {
             <Route path="stock" element={<AdminStock />} />
             <Route path="supply" element={<AdminSupply />} />
             <Route path="sales" element={<AdminSales />} />
-            <Route path="reviews" element={<AdminReviews />} /> {/* NOUVEAU */}
+            <Route path="reviews" element={<AdminReviews />} />
+            <Route path="newsletters" element={<AdminNewsletters />} />
             
             {/* Routes pour le Vendeur */}
             <Route path="my-products" element={<SellerProducts />} />
             <Route path="my-sales" element={<SellerSales />} />
-            <Route path="my-reviews" element={<AdminReviews />} /> {/* Pour les sellers */}
+            <Route path="my-stock" element={<SellerStock />} />
+            <Route path="my-supply" element={<SellerSupply />} />
+            <Route path="my-reviews" element={<AdminReviews />} />
             
             {/* Route partagée */}
             <Route path="settings" element={<AdminSettings />} />
@@ -108,6 +126,11 @@ const AppLayout = () => {
               onRemoveItem={handleRemoveFromCart} 
             />} 
           />
+          <Route 
+            path="/checkout" 
+            element={<CheckoutPage onClearCart={handleClearCart} />} 
+          />
+          <Route path="/order-success" element={<OrderSuccessPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<LoginPage />} /> 
