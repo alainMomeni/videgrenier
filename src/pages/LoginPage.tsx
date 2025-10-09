@@ -2,20 +2,37 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showResendButton, setShowResendButton] = useState(false);
+  const [resending, setResending] = useState(false);
   const auth = useAuth();
   const login = auth?.login;
   const navigate = useNavigate();
 
+  const handleResendVerification = async () => {
+    try {
+      setResending(true);
+      await api.post('/auth/resend-verification', { email });
+      setError('Verification email sent! Please check your inbox and spam folder.');
+      setShowResendButton(false);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to resend email');
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setShowResendButton(false);
     
     if (!email || !password) {
       return setError('Please fill in both fields.');
@@ -32,8 +49,10 @@ const LoginPage = () => {
     } catch (err: any) {
       console.error('Login error:', err);
       
-      // Gérer spécifiquement l'erreur de compte bloqué
-      if (err.response?.status === 403 && err.response?.data?.blocked) {
+      if (err.response?.status === 403 && err.response?.data?.emailNotVerified) {
+        setError(err.response.data.message);
+        setShowResendButton(true);
+      } else if (err.response?.status === 403 && err.response?.data?.blocked) {
         setError(err.response.data.message || 'Your account has been blocked.');
       } else if (err.response?.data?.message) {
         setError(err.response.data.message);
@@ -112,7 +131,27 @@ const LoginPage = () => {
             
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-600 text-center font-serif">{error}</p>
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-red-600 font-serif">{error}</p>
+                    {showResendButton && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleResendVerification}
+                          disabled={resending}
+                          className="mt-2 text-sm text-red-700 underline hover:text-red-800 font-semibold disabled:opacity-50"
+                        >
+                          {resending ? 'Sending...' : 'Resend Verification Email'}
+                        </button>
+                        <p className="text-xs text-red-600 mt-2">
+                          💡 Tip: Check your spam/junk folder if you don't see the email.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 

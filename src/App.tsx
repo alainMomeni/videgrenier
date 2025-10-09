@@ -8,6 +8,7 @@ import About from './pages/About';
 import { useState } from 'react';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import VerifyEmailPage from './pages/VerifyEmailPage'; // NOUVEAU
 import ProtectedRoute from './components/ProtectedRoute'; 
 import AdminLayout from './pages/admin/AdminLayout';
 import DashboardOverview from './pages/admin/DashboardOverview';
@@ -19,6 +20,7 @@ import OrderSuccessPage from './pages/OrderSuccessPage';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import ProfilManager from './pages/ProfilManager';
+import ContactPage from './pages/ContactPage';
 
 // --- IMPORTS POUR LES PAGES DU DASHBOARD ---
 import AdminProducts from './pages/admin/AdminProducts';
@@ -137,6 +139,8 @@ const AppLayout = () => {
           <Route path="/profil" element={<ProfilManager />} />
           <Route path="/login" element={<LoginPage />} /> 
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} /> {/* NOUVEAU */}
+          <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </main>
       <Footer />

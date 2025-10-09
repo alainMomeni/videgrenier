@@ -1,9 +1,8 @@
-// src/pages/SignupPage.tsx
-
+// frontend/src/pages/SignupPage.tsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Users } from 'lucide-react';
+import { User, Mail, Lock, Users, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const SignupPage = () => {
@@ -12,10 +11,10 @@ const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userType, setUserType] = useState('buyer'); // 'buyer' ou 'seller'
+  const [userType, setUserType] = useState('buyer');
   const [error, setError] = useState('');
+  const [showEmailSent, setShowEmailSent] = useState(false);
   const auth = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,6 +30,11 @@ const SignupPage = () => {
       return;
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
     if (!auth?.signup) {
       setError('Authentication service unavailable');
       return;
@@ -38,7 +42,7 @@ const SignupPage = () => {
     
     try {
       await auth.signup({ firstName, lastName, email, password, userType });
-      navigate('/');
+      setShowEmailSent(true);
     } catch (err) {
       if (typeof err === 'object' && err !== null && 'response' in err) {
         const response = (err as any).response;
@@ -48,6 +52,56 @@ const SignupPage = () => {
       }
     }
   };
+
+  if (showEmailSent) {
+    return (
+      <div className="min-h-[calc(100vh-128px)] flex items-center justify-center bg-[#f3efe7] py-12 px-4">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="max-w-md w-full bg-[#fcfaf7] border border-[#dcd6c9] rounded-lg shadow-lg p-8"
+        >
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle className="text-green-600" size={32} />
+            </div>
+            <h2 className="text-2xl font-serif font-bold text-[#2a363b] mb-2">
+              Check Your Email!
+            </h2>
+            <p className="text-gray-600 mb-4">
+              We've sent a verification link to <strong>{email}</strong>.
+            </p>
+            
+            {/* Avertissement pour vérifier les spams */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+              <p className="text-sm text-yellow-800 font-semibold mb-2">
+                📧 Email not in your inbox?
+              </p>
+              <p className="text-xs text-yellow-700">
+                Please check your <strong>Spam/Junk</strong> folder. 
+                If you find it there, mark it as "Not Spam" to receive future emails in your inbox.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Link
+                to="/login"
+                className="block px-6 py-3 bg-[#C06C54] text-white rounded-md hover:bg-opacity-90 transition font-serif"
+              >
+                Go to Login
+              </Link>
+              <button
+                onClick={() => setShowEmailSent(false)}
+                className="block w-full px-6 py-3 border border-[#dcd6c9] text-gray-700 rounded-md hover:bg-[#e7e2d9] transition font-serif"
+              >
+                Back to Signup
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -75,38 +129,68 @@ const SignupPage = () => {
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
             <div className="rounded-md space-y-4">
-              
-              {/* --- MODIFICATION ICI : Champs Nom et Prénom --- */}
               <div className="flex gap-4">
-                {/* First Name Input */}
                 <div className="flex-1">
                   <label htmlFor="first-name" className="sr-only">First name</label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3"><User className="h-5 w-5 text-gray-400" aria-hidden="true" /></span>
-                    <input id="first-name" name="first-name" type="text" autoComplete="given-name" required className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                      <User className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                    </span>
+                    <input 
+                      id="first-name" 
+                      name="first-name" 
+                      type="text" 
+                      autoComplete="given-name" 
+                      required 
+                      className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" 
+                      placeholder="First name" 
+                      value={firstName} 
+                      onChange={(e) => setFirstName(e.target.value)} 
+                    />
                   </div>
                 </div>
-                {/* Last Name Input */}
                 <div className="flex-1">
                   <label htmlFor="last-name" className="sr-only">Last name</label>
-                  <input id="last-name" name="last-name" type="text" autoComplete="family-name" required className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                  <input 
+                    id="last-name" 
+                    name="last-name" 
+                    type="text" 
+                    autoComplete="family-name" 
+                    required 
+                    className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" 
+                    placeholder="Last name" 
+                    value={lastName} 
+                    onChange={(e) => setLastName(e.target.value)} 
+                  />
                 </div>
               </div>
 
-              {/* Email Input */}
               <div>
                 <label htmlFor="email" className="sr-only">Email address</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3"><Mail className="h-5 w-5 text-gray-400" aria-hidden="true" /></span>
-                  <input id="email" name="email" type="email" autoComplete="email" required className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Mail className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </span>
+                  <input 
+                    id="email" 
+                    name="email" 
+                    type="email" 
+                    autoComplete="email" 
+                    required 
+                    className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" 
+                    placeholder="Email address" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                  />
                 </div>
               </div>
 
-              {/* --- MODIFICATION ICI : Champ de Sélection du Type d'Utilisateur --- */}
               <div>
                 <label htmlFor="user-type" className="sr-only">I am a</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3"><Users className="h-5 w-5 text-gray-400" aria-hidden="true" /></span>
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Users className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </span>
                   <select
                     id="user-type"
                     name="user-type"
@@ -121,29 +205,58 @@ const SignupPage = () => {
                 </div>
               </div>
 
-              {/* Password Input */}
               <div>
                 <label htmlFor="password" className="sr-only">Password</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3"><Lock className="h-5 w-5 text-gray-400" aria-hidden="true" /></span>
-                  <input id="password" name="password" type="password" autoComplete="new-password" required className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </span>
+                  <input 
+                    id="password" 
+                    name="password" 
+                    type="password" 
+                    autoComplete="new-password" 
+                    required 
+                    className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" 
+                    placeholder="Password" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                  />
                 </div>
               </div>
               
-              {/* Confirm Password Input */}
               <div>
                 <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3"><Lock className="h-5 w-5 text-gray-400" aria-hidden="true" /></span>
-                  <input id="confirm-password" name="confirm-password" type="password" autoComplete="new-password" required className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </span>
+                  <input 
+                    id="confirm-password" 
+                    name="confirm-password" 
+                    type="password" 
+                    autoComplete="new-password" 
+                    required 
+                    className="w-full bg-white border border-[#dcd6c9] rounded-md py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent sm:text-sm" 
+                    placeholder="Confirm Password" 
+                    value={confirmPassword} 
+                    onChange={(e) => setConfirmPassword(e.target.value)} 
+                  />
                 </div>
               </div>
             </div>
             
-            {error && (<p className="text-sm text-red-600 text-center font-serif">{error}</p>)}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600 text-center font-serif">{error}</p>
+              </div>
+            )}
 
             <div>
-              <button type="submit" className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#C06C54] hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C06C54] transition-transform transform hover:-translate-y-0.5">
+              <button 
+                type="submit" 
+                className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#C06C54] hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C06C54] transition-transform transform hover:-translate-y-0.5"
+              >
                 Create Account
               </button>
             </div>

@@ -112,20 +112,33 @@ const normalizeUser = (user: any) => ({
 });
 
 // ============================================
-// UPLOAD IMAGE
+// UPLOAD IMAGE - CLOUDINARY
 // ============================================
 
 export const uploadProductImage = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('image', file);
   
-  const response = await api.post('/upload/product-image', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  
-  return response.data.imageUrl;
+  try {
+    console.log('📤 Uploading image to Cloudinary...');
+    console.log('📄 File name:', file.name);
+    console.log('📄 File size:', (file.size / 1024).toFixed(2), 'KB');
+    
+    const response = await api.post('/upload/product-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    console.log('✅ Image uploaded successfully');
+    console.log('🔗 Cloudinary URL:', response.data.imageUrl);
+    
+    // Retourner directement l'URL Cloudinary complète
+    return response.data.imageUrl;
+  } catch (error: any) {
+    console.error('❌ Upload error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to upload image');
+  }
 };
 
 // ============================================

@@ -136,7 +136,7 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
   if (loading) {
     return (
       <div className="bg-[#f3efe7] min-h-screen py-20">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12 xl:px-16">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2a363b] mx-auto"></div>
@@ -151,7 +151,7 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
   if (error || !product) {
     return (
       <div className="bg-[#f3efe7] min-h-screen py-20">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12 xl:px-16">
           <div className="text-center py-20">
             <AlertCircle className="mx-auto h-24 w-24 text-red-400" />
             <h2 className="mt-4 text-2xl font-serif text-gray-600">
@@ -180,11 +180,11 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="bg-[#f3efe7] py-20"
+      className="bg-[#f3efe7] py-12 sm:py-16 lg:py-20"
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 max-w-7xl">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600 font-serif">
+        <div className="mb-6 sm:mb-8 text-sm text-gray-600 font-serif">
           <Link to="/shop" className="hover:text-[#2a363b]">Shop</Link>
           <span className="mx-2">/</span>
           <Link to="/shop" className="hover:text-[#2a363b]">{product.categorie}</Link>
@@ -192,10 +192,10 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
           <span className="text-[#2a363b]">{product.nom_produit}</span>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
           {/* Image du produit */}
           <motion.div 
-            className="rounded-lg overflow-hidden relative"
+            className="rounded-lg overflow-hidden relative bg-white shadow-md"
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -210,12 +210,12 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
             />
             
             {isOutOfStock && (
-              <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
+              <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                 Out of Stock
               </div>
             )}
             {isLowStock && (
-              <div className="absolute top-4 right-4 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+              <div className="absolute top-4 right-4 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                 Only {product.quantite} left
               </div>
             )}
@@ -223,30 +223,31 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
           
           {/* Détails du produit */}
           <motion.div
+            className="space-y-4"
             initial={{ x: 50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
           >
-            <p className="font-serif text-sm text-gray-500 mb-2">{product.categorie}</p>
-            <h1 className="text-4xl font-serif font-bold text-[#2a363b] mb-4">
+            <p className="font-serif text-sm text-gray-500">{product.categorie}</p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#2a363b] leading-tight">
               {product.nom_produit}
             </h1>
             
-            <p className="text-3xl text-gray-800 font-serif mb-6">
+            <p className="text-2xl sm:text-3xl text-gray-800 font-serif">
               ${product.prix.toFixed(2)}
             </p>
             
             {product.description ? (
-              <p className="text-gray-600 mb-8 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                 {product.description}
               </p>
             ) : (
-              <p className="text-gray-500 italic mb-8">
+              <p className="text-gray-500 italic text-sm sm:text-base">
                 No description available for this product.
               </p>
             )}
 
-            <div className="mb-6 flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-sm">
               <Package size={18} className="text-gray-500" />
               <span className={`font-semibold ${
                 isOutOfStock ? 'text-red-600' : 
@@ -260,13 +261,13 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
             </div>
 
             {product.nom_createur && (
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-sm text-gray-600">
                 Sold by: <span className="font-semibold">{product.nom_createur}</span>
               </p>
             )}
             
-            <div className="flex items-center gap-4 mb-8">
-              <div className="flex items-center border border-[#dcd6c9] rounded-md">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
+              <div className="flex items-center border border-[#dcd6c9] rounded-md bg-white">
                 <button 
                   onClick={() => handleQuantityChange(-1)} 
                   className="p-3 hover:bg-[#e7e2d9] transition rounded-l-md disabled:opacity-50 disabled:cursor-not-allowed"
@@ -274,7 +275,7 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
                 >
                   <Minus size={16} />
                 </button>
-                <span className="px-6 py-2 font-semibold">{quantity}</span>
+                <span className="px-6 py-2 font-semibold min-w-[60px] text-center">{quantity}</span>
                 <button 
                   onClick={() => handleQuantityChange(1)} 
                   className="p-3 hover:bg-[#e7e2d9] transition rounded-r-md disabled:opacity-50 disabled:cursor-not-allowed"
@@ -287,14 +288,14 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
               <button 
                 onClick={handleAddToCartClick}
                 disabled={isOutOfStock}
-                className="flex-1 bg-[#C06C54] text-white font-serif py-3 px-6 rounded-md hover:bg-opacity-90 transition-transform transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="flex-1 bg-[#C06C54] text-white font-serif py-3 px-6 rounded-md hover:bg-opacity-90 transition-transform transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-md"
               >
                 {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
               </button>
             </div>
 
             {isLowStock && (
-              <div className="mb-8 p-4 bg-orange-50 border border-orange-200 rounded-md flex items-start gap-3">
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-md flex items-start gap-3">
                 <AlertCircle className="text-orange-600 flex-shrink-0 mt-0.5" size={20} />
                 <div>
                   <p className="text-sm text-orange-800 font-semibold">Limited Stock</p>
@@ -305,7 +306,7 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-2 pt-4">
               <AccordionItem title="Materials & Care">
                 <p>
                   This product is carefully curated. Please handle with care. 
@@ -335,8 +336,8 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
         </div>
 
         {/* Section Customer Reviews */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-serif font-bold text-[#2a363b] mb-6">
+        <div className="mt-12 sm:mt-16 lg:mt-20">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#2a363b] mb-6 sm:mb-8">
             Customer Reviews
           </h2>
           
@@ -347,7 +348,7 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
               {!showReviewForm ? (
                 <button
                   onClick={() => setShowReviewForm(true)}
-                  className="px-6 py-3 bg-[#2a363b] text-white rounded-md hover:bg-opacity-90 transition font-serif"
+                  className="px-6 py-3 bg-[#2a363b] text-white rounded-md hover:bg-opacity-90 transition font-serif shadow-md"
                 >
                   Write a Review
                 </button>
@@ -360,7 +361,7 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
                   />
                   <button
                     onClick={() => setShowReviewForm(false)}
-                    className="mt-4 text-gray-600 hover:text-gray-900 text-sm font-serif"
+                    className="mt-4 text-gray-600 hover:text-gray-900 text-sm font-serif underline"
                   >
                     Cancel
                   </button>
@@ -371,14 +372,14 @@ const ProductDetailPage = ({ onAddToCart }: ProductDetailPageProps) => {
         </div>
 
         {/* Section "More from category" */}
-        <div className="mt-20">
-          <h2 className="text-2xl font-serif font-bold text-[#2a363b] mb-8 text-center">
+        <div className="mt-12 sm:mt-16 lg:mt-20">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#2a363b] mb-6 sm:mb-8 text-center">
             More from {product.categorie}
           </h2>
           <div className="text-center">
             <Link 
               to={`/shop?category=${product.categorie}`}
-              className="inline-block px-6 py-3 bg-[#2a363b] text-white rounded-md hover:bg-opacity-90 transition font-serif"
+              className="inline-block px-8 py-3 bg-[#2a363b] text-white rounded-md hover:bg-opacity-90 transition font-serif shadow-md"
             >
               View More {product.categorie}
             </Link>

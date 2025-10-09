@@ -247,14 +247,18 @@ const AdminProducts = ({ isSellerView = false }) => {
       let imageUrl = productData.photo;
       
       if (imageFile) {
-        const uploadedImageUrl = await uploadProductImage(imageFile);
-        imageUrl = `http://localhost:5000${uploadedImageUrl}`;
-        toast.success('Image uploaded successfully');
+        console.log('📸 Uploading new image to Cloudinary...');
+        
+        // Uploader vers Cloudinary et récupérer l'URL complète
+        imageUrl = await uploadProductImage(imageFile);
+        
+        console.log('✅ Image URL received from Cloudinary:', imageUrl);
+        toast.success('Image uploaded successfully to Cloudinary');
       }
       
       const dataToSend = {
         ...productData,
-        photo: imageUrl,
+        photo: imageUrl, // URL Cloudinary complète (pas besoin d'ajouter localhost)
         nom_createur: user ? `${user.firstName} ${user.lastName}` : 'Unknown'
       };
       
