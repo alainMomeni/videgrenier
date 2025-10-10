@@ -4,18 +4,20 @@ import toast from 'react-hot-toast';
 
 // Détection automatique de l'environnement
 const API_URL = import.meta.env.PROD 
-  ? 'https://videgrenierback.onrender.com/api' // Production (Render)
+  ? 'https://videgrenierback.onrender.com/api' // ✅ Production Render
   : 'http://localhost:5000/api'; // Développement local
 
 console.log('🔗 API URL:', API_URL);
 console.log('🌍 Environment:', import.meta.env.MODE);
+console.log('🏭 Production:', import.meta.env.PROD);
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 secondes (important pour Render qui peut être lent au démarrage)
+  timeout: 30000, // 30 secondes
+  withCredentials: true, // Important pour CORS avec credentials
 });
 
 // ============================================
@@ -62,6 +64,12 @@ api.interceptors.response.use(
     // Gérer les erreurs réseau
     if (!error.response) {
       toast.error('Network error. Please check your connection.');
+    }
+    
+    // Gérer les erreurs CORS
+    if (error.message && error.message.includes('CORS')) {
+      console.error('❌ CORS Error:', error);
+      toast.error('Connection error. Please try again.');
     }
     
     return Promise.reject(error);
@@ -146,7 +154,7 @@ export const uploadProductImage = async (file: File): Promise<string> => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      timeout: 60000, // 60 secondes pour l'upload d'images
+      timeout: 60000, // 60 secondes pour l'upload
     });
     
     console.log('✅ Image uploaded successfully');
