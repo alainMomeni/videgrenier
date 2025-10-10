@@ -2,13 +2,20 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = 'http://localhost:5000/api';
+// Détection automatique de l'environnement
+const API_URL = import.meta.env.PROD 
+  ? 'https://videgrenierback.onrender.com/api' // Production (Render)
+  : 'http://localhost:5000/api'; // Développement local
+
+console.log('🔗 API URL:', API_URL);
+console.log('🌍 Environment:', import.meta.env.MODE);
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 secondes (important pour Render qui peut être lent au démarrage)
 });
 
 // ============================================
@@ -29,10 +36,11 @@ api.interceptors.request.use(
   }
 );
 
-// Intercepteur de réponse : Gérer les comptes bloqués
+// Intercepteur de réponse : Gérer les comptes bloqués et les erreurs
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Gérer les comptes bloqués
     if (error.response?.status === 403 && error.response?.data?.blocked) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -44,6 +52,16 @@ api.interceptors.response.use(
       setTimeout(() => {
         window.location.href = '/login';
       }, 1500);
+    }
+    
+    // Gérer les erreurs de timeout
+    if (error.code === 'ECONNABORTED') {
+      toast.error('Request timeout. Please check your connection.');
+    }
+    
+    // Gérer les erreurs réseau
+    if (!error.response) {
+      toast.error('Network error. Please check your connection.');
     }
     
     return Promise.reject(error);
@@ -128,12 +146,12 @@ export const uploadProductImage = async (file: File): Promise<string> => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 60000, // 60 secondes pour l'upload d'images
     });
     
     console.log('✅ Image uploaded successfully');
     console.log('🔗 Cloudinary URL:', response.data.imageUrl);
     
-    // Retourner directement l'URL Cloudinary complète
     return response.data.imageUrl;
   } catch (error: any) {
     console.error('❌ Upload error:', error);
