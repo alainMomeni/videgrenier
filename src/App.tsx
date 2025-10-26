@@ -23,6 +23,7 @@ import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import ProfilManager from './pages/ProfilManager';
 import ContactPage from './pages/ContactPage';
+import MobilePaymentPage from './pages/MobilePaymentPage';
 
 // --- IMPORTS POUR LES PAGES DU DASHBOARD ---
 import AdminProducts from './pages/admin/AdminProducts';
@@ -145,6 +146,7 @@ const AppLayout = () => {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* ✅ NOUVEAU */}
           <Route path="/reset-password" element={<ResetPasswordPage />} />   {/* ✅ NOUVEAU */}
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/mobile-payment" element={<MobilePaymentPage />} />
         </Routes>
       </main>
       <Footer />

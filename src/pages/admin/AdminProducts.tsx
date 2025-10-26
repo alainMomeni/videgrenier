@@ -1,12 +1,15 @@
 // frontend/src/pages/admin/AdminProducts.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, UploadCloud, ChevronLeft, ChevronRight, Package, Coins } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, UploadCloud, ChevronLeft, ChevronRight, Package, Coins, AlertCircle, Loader } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI, uploadProductImage } from '../../services/api';
 import { PRODUCT_CATEGORIES } from '../../config/categories';
 import toast from 'react-hot-toast';
 import React from 'react';
+
+// ✅ PRIX MINIMUM POUR LES PRODUITS
+const MINIMUM_PRODUCT_PRICE = 150; // 150 FCFA minimum
 
 type Product = {
   id_produit: number;
@@ -26,9 +29,10 @@ type ProductModalProps = {
   onClose: () => void;
   onSave: (product: Omit<Product, 'id_produit' | 'nom_createur' | 'date_creation'>, imageFile: File | null) => void;
   product: Product | null;
+  isSaving: boolean; // ✅ NOUVEAU
 };
 
-const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) => {
+const ProductModal = ({ isOpen, onClose, onSave, product, isSaving }: ProductModalProps) => {
   const auth = useAuth();
   const user = auth?.user;
   
@@ -36,7 +40,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
     id_user: user?.id || 0, 
     nom_produit: '', 
     categorie: '', 
-    prix: 0, 
+    prix: MINIMUM_PRODUCT_PRICE,
     quantite: 0, 
     photo: '', 
     description: '' 
@@ -61,7 +65,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
         id_user: user?.id || 0, 
         nom_produit: '', 
         categorie: '', 
-        prix: 0, 
+        prix: MINIMUM_PRODUCT_PRICE,
         quantite: 0, 
         photo: '', 
         description: '' 
@@ -89,13 +93,26 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // ✅ VALIDATION DU PRIX MINIMUM
+    if (formData.prix < MINIMUM_PRODUCT_PRICE) {
+      toast.error(
+        `Minimum product price is ${MINIMUM_PRODUCT_PRICE} FCFA (required for Mobile Money payment)`,
+        {
+          duration: 5000,
+          icon: '⚠️',
+        }
+      );
+      return;
+    }
+
     onSave(formData, imageFile);
-    onClose();
   };
 
   if (!isOpen) return null;
 
   const inputStyle = "w-full bg-white border border-[#dcd6c9] rounded-md py-2 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#c0b8a8] focus:border-transparent text-sm";
+  const isPriceInvalid = formData.prix > 0 && formData.prix < MINIMUM_PRODUCT_PRICE;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start p-4 overflow-y-auto">
@@ -107,6 +124,18 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
         <h2 className="text-xl sm:text-2xl font-serif text-[#2a363b] mb-6">
           {product ? 'Edit Product' : 'Add New Product'}
         </h2>
+
+        {/* ✅ LOADER OVERLAY */}
+        {isSaving && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center rounded-lg z-10">
+            <Loader className="animate-spin h-12 w-12 text-[#2a363b] mb-4" />
+            <p className="text-lg font-serif text-[#2a363b] mb-2">
+              {imageFile ? 'Uploading image...' : 'Saving product...'}
+            </p>
+            <p className="text-sm text-gray-600">Please wait, this may take a moment</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Photo Upload */}
           <div>
@@ -125,7 +154,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
               </div>
               <label 
                 htmlFor="file-upload" 
-                className="cursor-pointer bg-white py-2 px-4 border border-[#dcd6c9] rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-[#e7e2d9] transition"
+                className={`cursor-pointer bg-white py-2 px-4 border border-[#dcd6c9] rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-[#e7e2d9] transition ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <span>Upload Photo</span>
                 <input 
@@ -135,6 +164,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
                   className="sr-only" 
                   onChange={handleImageChange} 
                   accept="image/*"
+                  disabled={isSaving}
                 />
               </label>
             </div>
@@ -155,6 +185,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
                 placeholder="Enter product name"
                 className={inputStyle} 
                 required
+                disabled={isSaving}
               />
             </div>
             <div>
@@ -168,6 +199,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
                 onChange={handleChange} 
                 className={inputStyle} 
                 required
+                disabled={isSaving}
               >
                 <option value="">-- Select a category --</option>
                 {PRODUCT_CATEGORIES.map(category => (
@@ -196,12 +228,26 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
                   value={formData.prix} 
                   onChange={handleChange} 
                   step="1" 
-                  min="0"
-                  placeholder="0"
-                  className={`${inputStyle} pl-10`} 
+                  min={MINIMUM_PRODUCT_PRICE}
+                  placeholder={`Min: ${MINIMUM_PRODUCT_PRICE}`}
+                  className={`${inputStyle} pl-10 ${isPriceInvalid ? 'border-red-500' : ''}`}
                   required
+                  disabled={isSaving}
                 />
               </div>
+              {isPriceInvalid && (
+                <div className="mt-2 flex items-start gap-2 text-red-600">
+                  <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                  <p className="text-xs">
+                    Price must be at least <strong>{MINIMUM_PRODUCT_PRICE} FCFA</strong> (required for Mobile Money)
+                  </p>
+                </div>
+              )}
+              {!isPriceInvalid && (
+                <p className="mt-1 text-xs text-gray-500">
+                  💡 Minimum: {MINIMUM_PRODUCT_PRICE} FCFA (for Mobile Money payment)
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="quantite" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
@@ -223,17 +269,23 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
                   </p>
                 </div>
               ) : (
-                <input 
-                  type="number" 
-                  name="quantite" 
-                  id="quantite" 
-                  value={formData.quantite} 
-                  onChange={handleChange} 
-                  min="0"
-                  placeholder="0"
-                  className={inputStyle} 
-                  required
-                />
+                <div>
+                  <input 
+                    type="number" 
+                    name="quantite" 
+                    id="quantite" 
+                    value={formData.quantite} 
+                    onChange={handleChange} 
+                    min="0"
+                    placeholder="0"
+                    className={inputStyle} 
+                    required
+                    disabled={isSaving}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 Initial stock quantity
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -251,6 +303,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
               rows={4} 
               placeholder="Describe your product..."
               className={inputStyle}
+              disabled={isSaving}
             />
           </div>
 
@@ -259,15 +312,24 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
             <button 
               type="button" 
               onClick={onClose} 
-              className="px-4 sm:px-6 py-2 text-sm font-serif text-gray-700 bg-white border border-[#dcd6c9] rounded-md hover:bg-gray-50 transition"
+              className="px-4 sm:px-6 py-2 text-sm font-serif text-gray-700 bg-white border border-[#dcd6c9] rounded-md hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSaving}
             >
               Cancel
             </button>
             <button 
-              type="submit" 
-              className="px-4 sm:px-6 py-2 text-sm font-serif text-white bg-[#2a363b] border border-transparent rounded-md hover:bg-opacity-90 transition"
+              type="submit"
+              disabled={isPriceInvalid || isSaving}
+              className="px-4 sm:px-6 py-2 text-sm font-serif text-white bg-[#2a363b] border border-transparent rounded-md hover:bg-opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {product ? 'Update Product' : 'Save Product'}
+              {isSaving ? (
+                <>
+                  <Loader className="animate-spin h-4 w-4" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <span>{product ? 'Update Product' : 'Save Product'}</span>
+              )}
             </button>
           </div>
         </form>
@@ -288,6 +350,7 @@ const AdminProducts = ({ isSellerView = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSaving, setIsSaving] = useState(false); // ✅ NOUVEAU
 
   useEffect(() => {
     fetchProducts();
@@ -297,8 +360,6 @@ const AdminProducts = ({ isSellerView = false }) => {
     try {
       setLoading(true);
       
-      // ✅ Si c'est un seller, on filtre par son ID
-      // ✅ Si c'est un admin en mode admin, on récupère tous les produits
       const response = isSellerView && user 
         ? await productAPI.getAll(user.id) 
         : await productAPI.getAll();
@@ -338,15 +399,29 @@ const AdminProducts = ({ isSellerView = false }) => {
 
   const handleSaveProduct = async (productData: Omit<Product, 'id_produit' | 'nom_createur' | 'date_creation'>, imageFile: File | null) => {
     try {
+      // ✅ VALIDATION DU PRIX MINIMUM
+      if (productData.prix < MINIMUM_PRODUCT_PRICE) {
+        toast.error(
+          `Product price must be at least ${MINIMUM_PRODUCT_PRICE} FCFA`,
+          {
+            duration: 5000,
+            icon: '⚠️',
+          }
+        );
+        return;
+      }
+
+      setIsSaving(true); // ✅ Activer le loader
+
       let imageUrl = productData.photo;
       
       if (imageFile) {
         console.log('📸 Uploading new image to Cloudinary...');
         imageUrl = await uploadProductImage(imageFile);
         console.log('✅ Image URL received from Cloudinary:', imageUrl);
-        toast.success('Image uploaded successfully to Cloudinary');
+        // ❌ RETIRÉ : toast.success('Image uploaded successfully to Cloudinary');
       }
-      
+     
       const dataToSend = {
         ...productData,
         photo: imageUrl,
@@ -355,16 +430,20 @@ const AdminProducts = ({ isSellerView = false }) => {
       
       if (editingProduct) {
         await productAPI.update(editingProduct.id_produit, dataToSend);
-        toast.success('Product updated successfully');
+        toast.success('Product updated successfully! 🎉');
       } else {
         await productAPI.create(dataToSend);
-        toast.success('Product created successfully');
+        toast.success('Product created successfully! 🎉');
       }
       
-      fetchProducts();
+      handleCloseModal(); // ✅ Fermer le modal
+      fetchProducts(); // ✅ Recharger les produits
+      
     } catch (error) {
       console.error('Error saving product:', error);
-      toast.error('Failed to save product');
+      toast.error('Failed to save product. Please try again.');
+    } finally {
+      setIsSaving(false); // ✅ Désactiver le loader
     }
   };
 
@@ -377,21 +456,18 @@ const AdminProducts = ({ isSellerView = false }) => {
       } catch (error: any) {
         console.error('Error deleting product:', error);
         
-        // ✅ Afficher le message d'erreur détaillé avec toutes les dépendances
         if (error.response?.data?.message) {
-          // Formater le message pour toast
           const message = error.response.data.message;
           
           toast.error(message, {
-            duration: 8000, // 8 secondes pour laisser le temps de lire
+            duration: 8000,
             style: {
               maxWidth: '600px',
-              whiteSpace: 'pre-line', // Respecter les retours à la ligne
+              whiteSpace: 'pre-line',
             },
             icon: '🚫',
           });
           
-          // Afficher aussi dans la console pour plus de détails
           if (error.response.data.dependencies) {
             console.log('📋 Product dependencies:', error.response.data.dependencies);
           }
@@ -587,7 +663,8 @@ const AdminProducts = ({ isSellerView = false }) => {
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         onSave={handleSaveProduct} 
-        product={editingProduct} 
+        product={editingProduct}
+        isSaving={isSaving} // ✅ Passer l'état du loader
       />
     </motion.div>
   );

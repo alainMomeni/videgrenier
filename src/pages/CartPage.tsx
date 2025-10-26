@@ -1,7 +1,6 @@
 // frontend/src/pages/CartPage.tsx
-
 import { motion } from 'framer-motion';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, AlertCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -20,6 +19,9 @@ type CartPageProps = {
   onUpdateQuantity: (productId: string | number, amount: number) => void;
   onRemoveItem: (productId: string | number) => void;
 };
+
+// ✅ MONTANT MINIMUM POUR MOBILE MONEY
+const MINIMUM_PAYMENT_AMOUNT = 150; // 150 FCFA
 
 const CartPage = ({ cartItems, onUpdateQuantity, onRemoveItem }: CartPageProps) => {
   const navigate = useNavigate();
@@ -46,6 +48,10 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemoveItem }: CartPageProps) 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = 0; // Free shipping
   const total = subtotal + shipping;
+
+  // ✅ VÉRIFIER SI LE MONTANT EST SOUS LE MINIMUM
+  const isBelowMinimum = total < MINIMUM_PAYMENT_AMOUNT;
+  const amountNeeded = MINIMUM_PAYMENT_AMOUNT - total;
 
   if (cartItems.length === 0) {
     return (
@@ -110,12 +116,12 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemoveItem }: CartPageProps) 
                       <p className="text-xs text-gray-500 mb-2">{item.category}</p>
                     )}
                     <p className="text-lg font-semibold text-[#2a363b] sm:hidden">
-                      ${item.price.toFixed(2)}
+                      {item.price.toFixed(0)} FCFA
                     </p>
                   </div>
                   <div className="flex items-center justify-between sm:justify-normal sm:items-start sm:flex-col sm:gap-2">
                     <p className="hidden sm:block text-lg font-semibold text-right text-[#2a363b]">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {(item.price * item.quantity).toFixed(0)} FCFA
                     </p>
                     <div className="flex items-center gap-2 border border-[#dcd6c9] rounded-md">
                       <button onClick={() => onUpdateQuantity(item.id, -1)} className="p-2 hover:bg-[#e7e2d9] transition rounded-l-md" aria-label="Decrease quantity"><Minus size={16} /></button>
@@ -135,10 +141,11 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemoveItem }: CartPageProps) 
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg border border-[#dcd6c9] p-6 sticky top-24">
               <h2 className="text-xl font-serif font-bold text-[#2a363b] mb-4">Order Summary</h2>
+              
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between font-serif">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                  <span className="font-semibold">{subtotal.toFixed(0)} FCFA</span>
                 </div>
                 <div className="flex justify-between font-serif">
                   <span className="text-gray-600">Shipping</span>
@@ -147,13 +154,47 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemoveItem }: CartPageProps) 
                 <div className="border-t border-[#dcd6c9] pt-4 mt-4">
                   <div className="flex justify-between text-lg font-serif">
                     <span className="font-bold">Total</span>
-                    <span className="font-bold text-[#2a363b]">${total.toFixed(2)}</span>
+                    <span className="font-bold text-[#2a363b]">{total.toFixed(0)} FCFA</span>
                   </div>
                 </div>
               </div>
-              <button onClick={handleCheckout} className="w-full bg-[#C06C54] text-white py-3 rounded-md hover:bg-opacity-90 transition font-serif flex items-center justify-center gap-2 shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+
+              {/* ✅ AVERTISSEMENT SI MONTANT INSUFFISANT */}
+              {isBelowMinimum && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="text-yellow-600 flex-shrink-0 mt-0.5" size={18} />
+                    <div>
+                      <p className="text-sm font-semibold text-yellow-800">
+                        Minimum Order for Mobile Money
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Minimum: <strong>{MINIMUM_PAYMENT_AMOUNT} FCFA</strong>
+                        <br />
+                        Current: <strong>{total.toFixed(0)} FCFA</strong>
+                        <br />
+                        <span className="text-yellow-800">
+                          Add <strong>{amountNeeded.toFixed(0)} FCFA</strong> more to checkout with Mobile Money.
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <button 
+                onClick={handleCheckout} 
+                className="w-full bg-[#C06C54] text-white py-3 rounded-md hover:bg-opacity-90 transition font-serif flex items-center justify-center gap-2 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+              >
                 Proceed to Checkout <ArrowRight size={18} />
               </button>
+
+              {isBelowMinimum && (
+                <p className="text-xs text-center text-gray-600 mt-2">
+                  * Card and PayPal available for any amount
+                </p>
+              )}
+
               <Link to="/shop" className="block text-center mt-4 text-gray-600 hover:text-[#2a363b] transition font-serif text-sm hover:underline">
                 Continue Shopping
               </Link>

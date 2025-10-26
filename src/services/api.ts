@@ -444,4 +444,21 @@ export const authAPI = {
     api.post('/auth/reset-password', data),
 };
 
+// ============================================
+// API PAYMENT (Mobile Money CamPay)
+// ============================================
+
+export const paymentAPI = {
+  // Initier un paiement mobile money
+  initiateMobilePayment: (data: {
+    order_id: string;
+    phone_number: string;
+    amount: number;
+    operator: 'orange' | 'mtn';
+  }) => api.post('/payment/mobile/initiate', data),
+  
+  // Vérifier le statut d'un paiement
+  checkPaymentStatus: (reference: string) => api.get(`/payment/status/${reference}`),
+};
+
 export default api;
