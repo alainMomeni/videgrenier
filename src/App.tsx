@@ -8,7 +8,9 @@ import About from './pages/About';
 import { useState } from 'react';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import VerifyEmailPage from './pages/VerifyEmailPage'; // NOUVEAU
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage'; // ✅ NOUVEAU
+import ResetPasswordPage from './pages/ResetPasswordPage';   // ✅ NOUVEAU
 import ProtectedRoute from './components/ProtectedRoute'; 
 import AdminLayout from './pages/admin/AdminLayout';
 import DashboardOverview from './pages/admin/DashboardOverview';
@@ -139,7 +141,9 @@ const AppLayout = () => {
           <Route path="/profil" element={<ProfilManager />} />
           <Route path="/login" element={<LoginPage />} /> 
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} /> {/* NOUVEAU */}
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* ✅ NOUVEAU */}
+          <Route path="/reset-password" element={<ResetPasswordPage />} />   {/* ✅ NOUVEAU */}
           <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </main>

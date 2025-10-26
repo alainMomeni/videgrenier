@@ -1,8 +1,7 @@
-// src/pages/admin/AdminStock.tsx
-
+// frontend/src/pages/admin/AdminStock.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Calendar, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { stockAPI } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -107,21 +106,28 @@ const AdminStock = ({ isSellerView = false }) => {
     }
   };
 
-  const handleStockUpdate = async (stockId: number, newStock: number) => {
-    try {
-      const updatedStock = Math.max(0, newStock);
-      const stockRecord = stocks.find(s => s.id_stock === stockId);
-      
-      await stockAPI.updateStock(stockId, {
-        stock_actuel: updatedStock,
-        prix_unitaire: stockRecord?.prix_unitaire
-      });
-      
-      toast.success('Stock updated successfully');
-      fetchStockRecords();
-    } catch (error) {
-      console.error('Error updating stock:', error);
-      toast.error('Failed to update stock');
+  const handleDeleteStock = async (stockId: number, productName: string) => {
+    if (window.confirm(`Are you sure you want to delete the stock record for "${productName}"?`)) {
+      try {
+        await stockAPI.delete(stockId);
+        toast.success('Stock record deleted successfully');
+        fetchStockRecords();
+      } catch (error: any) {
+        console.error('Error deleting stock:', error);
+        
+        // ✅ Afficher le message d'erreur détaillé
+        if (error.response?.data?.message) {
+          toast.error(error.response.data.message, {
+            duration: 6000,
+            style: {
+              maxWidth: '600px',
+            },
+            icon: '🚫',
+          });
+        } else {
+          toast.error('Failed to delete stock record');
+        }
+      }
     }
   };
   
@@ -183,33 +189,34 @@ const AdminStock = ({ isSellerView = false }) => {
           <table className="min-w-full divide-y divide-[#dcd6c9]">
             <thead className="bg-[#f3efe7]">
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase">Product</th>
-                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden sm:table-cell">Opening</th>
-                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase">Sold</th>
-                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden lg:table-cell">Restocked</th>
-                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase">Current Stock</th>
-                <th className="px-3 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden md:table-cell">Stock Value</th>
-                <th className="px-3 py-3 text-right text-xs font-serif font-semibold text-[#2a363b] uppercase">Quick Update</th>
+                <th className="px-4 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase">Product</th>
+                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden sm:table-cell">Opening</th>
+                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase">Sold</th>
+                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden lg:table-cell">Restocked</th>
+                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase">Current Stock</th>
+                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase hidden md:table-cell">Stock Value</th>
+                <th className="px-4 py-3 text-right text-xs font-serif font-semibold text-[#2a363b] uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-[#e7e2d9]">
               {paginatedStocks.map(stock => (
                 <tr key={stock.id_stock} className="hover:bg-gray-50">
-                  <td className="px-3 py-3 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">{stock.nom_produit}</div>
                   </td>
-                  <td className="px-3 py-3 text-center text-sm text-gray-600 hidden sm:table-cell">{stock.quantite_ouverture_mois}</td>
-                  <td className="px-3 py-3 text-center"><span className="text-sm font-medium text-orange-600">{stock.quantite_vendu_mois}</span></td>
-                  <td className="px-3 py-3 text-center text-sm text-green-600 font-medium hidden lg:table-cell">{stock.quantite_approvisionner > 0 ? `+${stock.quantite_approvisionner}` : '-'}</td>
-                  <td className="px-3 py-3 text-center"><StockIndicator stock={stock.stock_actuel} /></td>
-                  <td className="px-3 py-3 text-center font-semibold text-gray-800 hidden md:table-cell">${Number(stock.valeur_stock).toLocaleString()}</td>
-                  <td className="px-3 py-3 text-right">
-                    <input
-                      type="number"
-                      defaultValue={stock.stock_actuel}
-                      onBlur={(e) => handleStockUpdate(stock.id_stock, parseInt(e.target.value, 10))}
-                      className="w-20 text-center border border-[#dcd6c9] rounded-md py-1 px-2 focus:ring-2 focus:ring-[#c0b8a8] focus:outline-none text-sm"
-                    />
+                  <td className="px-4 py-3 text-center text-sm text-gray-600 hidden sm:table-cell">{stock.quantite_ouverture_mois}</td>
+                  <td className="px-4 py-3 text-center"><span className="text-sm font-medium text-orange-600">{stock.quantite_vendu_mois}</span></td>
+                  <td className="px-4 py-3 text-center text-sm text-green-600 font-medium hidden lg:table-cell">{stock.quantite_approvisionner > 0 ? `+${stock.quantite_approvisionner}` : '-'}</td>
+                  <td className="px-4 py-3 text-center"><StockIndicator stock={stock.stock_actuel} /></td>
+                  <td className="px-4 py-3 text-center font-semibold text-gray-800 hidden md:table-cell">{Number(stock.valeur_stock).toLocaleString()} FCFA</td>
+                  <td className="px-4 py-3 text-right">
+                    <button 
+                      onClick={() => handleDeleteStock(stock.id_stock, stock.nom_produit)} 
+                      className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition"
+                      title="Delete stock record"
+                    >
+                      <Trash2 size={16}/>
+                    </button>
                   </td>
                 </tr>
               ))}

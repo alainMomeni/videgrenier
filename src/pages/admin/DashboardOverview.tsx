@@ -127,19 +127,31 @@ const DashboardOverview = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
 
-      // Fetch products
-      const productsResponse = await productAPI.getAll(isAdmin ? undefined : user?.id);
-      const products: Product[] = productsResponse.data;
+      console.log('🔍 Fetching dashboard data...');
+      console.log('📍 User ID:', user?.id);
+      console.log('👤 Is Admin:', isAdmin);
 
-      // Fetch sales
-      const salesResponse = await salesAPI.getAll(isAdmin ? undefined : user?.id);
+      // ✅ Fetch products - FILTRE PAR UTILISATEUR SI PAS ADMIN
+      const productsResponse = isAdmin 
+        ? await productAPI.getAll()
+        : await productAPI.getAll(user?.id);
+      
+      const products: Product[] = productsResponse.data;
+      console.log('📦 Products loaded:', products.length);
+
+      // ✅ Fetch sales - FILTRE PAR UTILISATEUR SI PAS ADMIN
+      const salesResponse = isAdmin 
+        ? await salesAPI.getAll()
+        : await salesAPI.getAll(user?.id);
+      
       const sales: Sale[] = salesResponse.data;
+      console.log('💰 Sales loaded:', sales.length);
 
       // Calculate stats
       const totalRevenue = sales.reduce((sum: number, sale: Sale) => sum + sale.total_amount, 0);
@@ -197,8 +209,10 @@ const DashboardOverview = () => {
         recentSalesCount: recentSalesData.length
       });
 
+      console.log('✅ Dashboard data loaded successfully');
+
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('❌ Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -230,14 +244,14 @@ const DashboardOverview = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Products"
+          title={isAdmin ? "Total Products" : "My Products"}
           value={stats.totalProducts}
           icon={<ShoppingBag size={24} />}
           color="bg-blue-600"
         />
         
         <StatCard
-          title="Total Sales"
+          title={isAdmin ? "Total Sales" : "My Sales"}
           value={stats.totalSales}
           icon={<TrendingUp size={24} />}
           trend={stats.recentSalesCount > 0 ? 12 : 0}
@@ -246,8 +260,8 @@ const DashboardOverview = () => {
         />
         
         <StatCard
-          title="Total Revenue"
-          value={`$${stats.totalRevenue.toFixed(2)}`}
+          title={isAdmin ? "Total Revenue" : "My Revenue"}
+          value={`${stats.totalRevenue.toFixed(0)} FCFA`}
           icon={<DollarSign size={24} />}
           trend={stats.totalRevenue > 0 ? 8 : 0}
           trendLabel="vs last month"
@@ -320,8 +334,8 @@ const DashboardOverview = () => {
               {recentSales.map((sale: RecentSale) => (
                 <div key={sale.id_sale} className="flex items-center justify-between py-3 border-b border-[#e7e2d9] last:border-0">
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900 text-sm">{sale.buyer_name}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="font-semibold text-gray-900 text-sm"></p>
+                    <p className="font-semibold text-gray-900 text-sm">
                       {sale.nom_produit || `Order #${sale.order_id.slice(0, 12)}...`}
                     </p>
                     <p className="text-xs text-gray-400">
@@ -330,7 +344,7 @@ const DashboardOverview = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-[#2a363b]">
-                      ${sale.total_amount.toFixed(2)}
+                      {sale.total_amount.toFixed(0)} FCFA
                     </p>
                     <span className={`text-xs px-2 py-1 rounded ${
                       sale.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -349,7 +363,9 @@ const DashboardOverview = () => {
         {/* Top Products */}
         <div className="bg-white rounded-lg border border-[#dcd6c9] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-serif font-bold text-[#2a363b]">Top Products</h2>
+            <h2 className="text-xl font-serif font-bold text-[#2a363b]">
+              {isAdmin ? "Top Products" : "My Products"}
+            </h2>
             <Link 
               to={isAdmin ? "/admin/products" : "/admin/my-products"}
               className="text-sm text-[#C06C54] hover:underline font-serif"
@@ -381,7 +397,7 @@ const DashboardOverview = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-[#2a363b]">
-                      ${product.prix.toFixed(2)}
+                      {product.prix.toFixed(0)} FCFA
                     </p>
                   </div>
                 </div>

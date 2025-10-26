@@ -1,7 +1,7 @@
 // frontend/src/pages/admin/AdminNewsletters.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Trash2, Mail, Download, RefreshCw, ChevronLeft, ChevronRight, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Trash2, Mail, RefreshCw, ChevronLeft, ChevronRight, CheckCircle, XCircle } from 'lucide-react';
 import { newsletterAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -104,25 +104,6 @@ const AdminNewsletters = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    const csv = [
-      ['Email', 'Subscribed At', 'Status'],
-      ...filteredNewsletters.map(n => [
-        n.email,
-        new Date(n.subscribedAt).toLocaleDateString(),
-        n.isActive ? 'Active' : 'Inactive'
-      ])
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    toast.success('CSV exported successfully');
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -141,12 +122,6 @@ const AdminNewsletters = () => {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#2a363b]">Newsletter Subscribers</h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your newsletter email list.</p>
         </div>
-        <button 
-          onClick={handleExportCSV}
-          className="flex items-center gap-2 px-4 py-2 bg-[#70816B] text-white rounded-md hover:bg-opacity-90 transition font-serif text-sm"
-        >
-          <Download size={18} /> Export CSV
-        </button>
       </div>
 
       {/* Stats Cards */}

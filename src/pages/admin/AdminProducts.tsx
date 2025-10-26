@@ -1,9 +1,10 @@
 // frontend/src/pages/admin/AdminProducts.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, UploadCloud, DollarSign, ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, UploadCloud, ChevronLeft, ChevronRight, Package, Coins } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { productAPI, uploadProductImage } from '../../services/api';
+import { PRODUCT_CATEGORIES } from '../../config/categories';
 import toast from 'react-hot-toast';
 import React from 'react';
 
@@ -98,50 +99,113 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start p-4 overflow-y-auto">
-      <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-[#fcfaf7] rounded-lg shadow-xl w-full max-w-2xl p-6 sm:p-8 border border-[#dcd6c9] my-8">
-        <h2 className="text-xl sm:text-2xl font-serif text-[#2a363b] mb-6">{product ? 'Edit Product' : 'Add New Product'}</h2>
+      <motion.div 
+        initial={{ y: -50, opacity: 0 }} 
+        animate={{ y: 0, opacity: 1 }} 
+        className="bg-[#fcfaf7] rounded-lg shadow-xl w-full max-w-2xl p-6 sm:p-8 border border-[#dcd6c9] my-8"
+      >
+        <h2 className="text-xl sm:text-2xl font-serif text-[#2a363b] mb-6">
+          {product ? 'Edit Product' : 'Add New Product'}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Photo Upload */}
           <div>
-            <label className="block text-sm font-serif font-medium text-[#2a363b] mb-2">Product Photo</label>
+            <label className="block text-sm font-serif font-medium text-[#2a363b] mb-2">
+              Product Photo
+            </label>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="h-24 w-24 rounded-md overflow-hidden bg-[#e7e2d9] flex-shrink-0">
-                {imagePreview ? <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" /> : <div className="h-full w-full flex items-center justify-center text-gray-500"><UploadCloud size={24} /></div>}
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-gray-500">
+                    <UploadCloud size={24} />
+                  </div>
+                )}
               </div>
-              <label htmlFor="file-upload" className="cursor-pointer bg-white py-2 px-4 border border-[#dcd6c9] rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-[#e7e2d9] transition">
+              <label 
+                htmlFor="file-upload" 
+                className="cursor-pointer bg-white py-2 px-4 border border-[#dcd6c9] rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-[#e7e2d9] transition"
+              >
                 <span>Upload Photo</span>
-                <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*"/>
+                <input 
+                  id="file-upload" 
+                  name="file-upload" 
+                  type="file" 
+                  className="sr-only" 
+                  onChange={handleImageChange} 
+                  accept="image/*"
+                />
               </label>
             </div>
           </div>
+
+          {/* Product Name & Category */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label htmlFor="nom_produit" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">Product Name</label>
-              <input type="text" name="nom_produit" id="nom_produit" value={formData.nom_produit} onChange={handleChange} className={inputStyle} required/>
+              <label htmlFor="nom_produit" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
+                Product Name *
+              </label>
+              <input 
+                type="text" 
+                name="nom_produit" 
+                id="nom_produit" 
+                value={formData.nom_produit} 
+                onChange={handleChange} 
+                placeholder="Enter product name"
+                className={inputStyle} 
+                required
+              />
             </div>
             <div>
-              <label htmlFor="categorie" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">Category</label>
-              <select name="categorie" id="categorie" value={formData.categorie} onChange={handleChange} className={inputStyle} required>
-                <option value="">Select category</option>
-                <option value="Handbags">Handbags</option>
-                <option value="Jewelry">Jewelry</option>
-                <option value="Men's Fashion">Men's Fashion</option>
-                <option value="Sandals">Sandals</option>
-                <option value="Sneakers">Sneakers</option>
-                <option value="T-Shirts">T-Shirts</option>
+              <label htmlFor="categorie" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
+                Category *
+              </label>
+              <select 
+                name="categorie" 
+                id="categorie" 
+                value={formData.categorie} 
+                onChange={handleChange} 
+                className={inputStyle} 
+                required
+              >
+                <option value="">-- Select a category --</option>
+                {PRODUCT_CATEGORIES.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
+
+          {/* Price & Quantity */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label htmlFor="prix" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">Price</label>
+              <label htmlFor="prix" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
+                Price (FCFA) *
+              </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"><DollarSign size={16} /></span>
-                <input type="number" name="prix" id="prix" value={formData.prix} onChange={handleChange} step="0.01" className={`${inputStyle} pl-10`} required/>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                  <Coins size={16} />
+                </span>
+                <input 
+                  type="number" 
+                  name="prix" 
+                  id="prix" 
+                  value={formData.prix} 
+                  onChange={handleChange} 
+                  step="1" 
+                  min="0"
+                  placeholder="0"
+                  className={`${inputStyle} pl-10`} 
+                  required
+                />
               </div>
             </div>
             <div>
               <label htmlFor="quantite" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
-                {product ? 'Current Quantity (Read-only)' : 'Initial Quantity'}
+                {product ? 'Current Quantity (Read-only)' : 'Initial Quantity *'}
               </label>
               {product ? (
                 <div>
@@ -155,7 +219,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
                     readOnly
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Quantity is managed via Sales and Supplies only
+                    💡 Quantity is managed via Sales and Supplies only
                   </p>
                 </div>
               ) : (
@@ -165,19 +229,46 @@ const ProductModal = ({ isOpen, onClose, onSave, product }: ProductModalProps) =
                   id="quantite" 
                   value={formData.quantite} 
                   onChange={handleChange} 
+                  min="0"
+                  placeholder="0"
                   className={inputStyle} 
                   required
                 />
               )}
             </div>
           </div>
+
+          {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">Description</label>
-            <textarea name="description" id="description" value={formData.description} onChange={handleChange} rows={4} className={inputStyle}></textarea>
+            <label htmlFor="description" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
+              Description (Optional)
+            </label>
+            <textarea 
+              name="description" 
+              id="description" 
+              value={formData.description} 
+              onChange={handleChange} 
+              rows={4} 
+              placeholder="Describe your product..."
+              className={inputStyle}
+            />
           </div>
+
+          {/* Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t border-[#dcd6c9]">
-            <button type="button" onClick={onClose} className="px-4 sm:px-6 py-2 text-sm font-serif text-gray-700 bg-white border border-[#dcd6c9] rounded-md hover:bg-gray-50 transition">Cancel</button>
-            <button type="submit" className="px-4 sm:px-6 py-2 text-sm font-serif text-white bg-[#2a363b] border border-transparent rounded-md hover:bg-opacity-90 transition">Save Product</button>
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="px-4 sm:px-6 py-2 text-sm font-serif text-gray-700 bg-white border border-[#dcd6c9] rounded-md hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="px-4 sm:px-6 py-2 text-sm font-serif text-white bg-[#2a363b] border border-transparent rounded-md hover:bg-opacity-90 transition"
+            >
+              {product ? 'Update Product' : 'Save Product'}
+            </button>
           </div>
         </form>
       </motion.div>
@@ -205,6 +296,9 @@ const AdminProducts = ({ isSellerView = false }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      
+      // ✅ Si c'est un seller, on filtre par son ID
+      // ✅ Si c'est un admin en mode admin, on récupère tous les produits
       const response = isSellerView && user 
         ? await productAPI.getAll(user.id) 
         : await productAPI.getAll();
@@ -248,17 +342,14 @@ const AdminProducts = ({ isSellerView = false }) => {
       
       if (imageFile) {
         console.log('📸 Uploading new image to Cloudinary...');
-        
-        // Uploader vers Cloudinary et récupérer l'URL complète
         imageUrl = await uploadProductImage(imageFile);
-        
         console.log('✅ Image URL received from Cloudinary:', imageUrl);
         toast.success('Image uploaded successfully to Cloudinary');
       }
       
       const dataToSend = {
         ...productData,
-        photo: imageUrl, // URL Cloudinary complète (pas besoin d'ajouter localhost)
+        photo: imageUrl,
         nom_createur: user ? `${user.firstName} ${user.lastName}` : 'Unknown'
       };
       
@@ -283,9 +374,30 @@ const AdminProducts = ({ isSellerView = false }) => {
         await productAPI.delete(productId);
         toast.success('Product deleted successfully');
         fetchProducts();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting product:', error);
-        toast.error('Failed to delete product');
+        
+        // ✅ Afficher le message d'erreur détaillé avec toutes les dépendances
+        if (error.response?.data?.message) {
+          // Formater le message pour toast
+          const message = error.response.data.message;
+          
+          toast.error(message, {
+            duration: 8000, // 8 secondes pour laisser le temps de lire
+            style: {
+              maxWidth: '600px',
+              whiteSpace: 'pre-line', // Respecter les retours à la ligne
+            },
+            icon: '🚫',
+          });
+          
+          // Afficher aussi dans la console pour plus de détails
+          if (error.response.data.dependencies) {
+            console.log('📋 Product dependencies:', error.response.data.dependencies);
+          }
+        } else {
+          toast.error('Failed to delete product');
+        }
       }
     }
   };
@@ -314,10 +426,19 @@ const AdminProducts = ({ isSellerView = false }) => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 sm:mb-8 gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#2a363b]">{isSellerView ? 'My Products' : 'Manage All Products'}</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">{isSellerView ? 'Add, edit, or remove your products from the catalog.' : 'Manage all products from all sellers.'}</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#2a363b]">
+            {isSellerView ? 'My Products' : 'Manage All Products'}
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
+            {isSellerView 
+              ? 'Add, edit, or remove your products from the catalog.' 
+              : 'Manage all products from all sellers.'}
+          </p>
         </div>
-        <button onClick={() => handleOpenModal()} className="flex items-center gap-2 px-4 py-2 bg-[#2a363b] text-white rounded-md hover:bg-opacity-90 transition font-serif text-sm">
+        <button 
+          onClick={() => handleOpenModal()} 
+          className="flex items-center gap-2 px-4 py-2 bg-[#2a363b] text-white rounded-md hover:bg-opacity-90 transition font-serif text-sm"
+        >
           <Plus size={18} /> Add Product
         </button>
       </div>
@@ -340,14 +461,26 @@ const AdminProducts = ({ isSellerView = false }) => {
           <table className="min-w-full divide-y divide-[#dcd6c9]">
             <thead className="bg-[#f3efe7]">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Photo & Name</th>
+                <th className="px-4 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">
+                  Photo & Name
+                </th>
                 {!isSellerView && (
-                  <th className="px-4 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider hidden sm:table-cell">Created By</th>
+                  <th className="px-4 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider hidden sm:table-cell">
+                    Created By
+                  </th>
                 )}
-                <th className="px-4 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider hidden lg:table-cell">Category</th>
-                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Quantity</th>
-                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Price</th>
-                <th className="px-4 py-3 text-right text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider hidden lg:table-cell">
+                  Category
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">
+                  Quantity
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-serif font-semibold text-[#2a363b] uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-[#e7e2d9]">
@@ -355,27 +488,61 @@ const AdminProducts = ({ isSellerView = false }) => {
                 <tr key={product.id_produit} className="hover:bg-gray-50">
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10"><img className="h-10 w-10 rounded-md object-cover" src={product.photo} alt={product.nom_produit} /></div>
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <img 
+                          className="h-10 w-10 rounded-md object-cover" 
+                          src={product.photo} 
+                          alt={product.nom_produit} 
+                        />
+                      </div>
                       <div className="ml-3">
-                        <div className="text-sm font-semibold text-gray-900">{product.nom_produit}</div>
-                        {isSellerView && <div className="text-xs text-gray-500 sm:hidden">{product.nom_createur}</div>}
+                        <div className="text-sm font-semibold text-gray-900">
+                          {product.nom_produit}
+                        </div>
+                        {isSellerView && (
+                          <div className="text-xs text-gray-500 sm:hidden">
+                            {product.nom_createur}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
                   {!isSellerView && (
                     <td className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">
-                      <div className="flex items-center"><Package size={14} className="text-gray-400 mr-2" /><span className="text-sm text-gray-700">{product.nom_createur}</span></div>
+                      <div className="flex items-center">
+                        <Package size={14} className="text-gray-400 mr-2" />
+                        <span className="text-sm text-gray-700">{product.nom_createur}</span>
+                      </div>
                     </td>
                   )}
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 hidden lg:table-cell">{product.categorie}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
-                    <div className="flex items-center justify-center"><Package size={14} className="text-gray-400 mr-1" /><span className="font-medium">{product.quantite}</span></div>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 hidden lg:table-cell">
+                    {product.categorie}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-center font-semibold text-gray-800">${Number(product.prix).toFixed(2)}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
+                    <div className="flex items-center justify-center">
+                      <Package size={14} className="text-gray-400 mr-1" />
+                      <span className="font-medium">{product.quantite}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-center font-semibold text-gray-800">
+                    {product.prix.toLocaleString('fr-FR')} FCFA
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-1">
-                      <button onClick={() => handleOpenModal(product)} className="p-1.5 text-gray-500 hover:bg-[#e7e2d9] rounded-md transition"><Edit size={16}/></button>
-                      <button onClick={() => handleDeleteProduct(product.id_produit)} className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition"><Trash2 size={16}/></button>
+                      <button 
+                        onClick={() => handleOpenModal(product)} 
+                        className="p-1.5 text-gray-500 hover:bg-[#e7e2d9] rounded-md transition"
+                        title="Edit product"
+                      >
+                        <Edit size={16}/>
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteProduct(product.id_produit)} 
+                        className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition"
+                        title="Delete product"
+                      >
+                        <Trash2 size={16}/>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -394,18 +561,34 @@ const AdminProducts = ({ isSellerView = false }) => {
         
         {totalPages > 1 && (
           <nav className="flex items-center gap-2">
-            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="p-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e7e2d9] rounded-md transition">
+            <button 
+              onClick={() => handlePageChange(currentPage - 1)} 
+              disabled={currentPage === 1} 
+              className="p-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e7e2d9] rounded-md transition"
+            >
               <ChevronLeft size={20} />
             </button>
-            <span className="text-sm text-gray-700">Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span></span>
-            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="p-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e7e2d9] rounded-md transition">
+            <span className="text-sm text-gray-700">
+              Page <span className="font-semibold">{currentPage}</span> of{' '}
+              <span className="font-semibold">{totalPages}</span>
+            </span>
+            <button 
+              onClick={() => handlePageChange(currentPage + 1)} 
+              disabled={currentPage === totalPages} 
+              className="p-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e7e2d9] rounded-md transition"
+            >
               <ChevronRight size={20} />
             </button>
           </nav>
         )}
       </div>
 
-      <ProductModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleSaveProduct} product={editingProduct} />
+      <ProductModal 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal} 
+        onSave={handleSaveProduct} 
+        product={editingProduct} 
+      />
     </motion.div>
   );
 };

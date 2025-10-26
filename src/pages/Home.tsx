@@ -191,14 +191,14 @@ const Home = ({ }: HomeProps) => {
 
   const testimonials = [
     {
-      name: "Sarah Martinez",
+      name: "Amina Kouassi",
       text: "Found amazing vintage pieces at half the retail price!",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+      avatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&h=100&fit=crop"
     },
     {
-      name: "James Chen", 
+      name: "Kwame Mensah", 
       text: "Sold my entire old wardrobe in just 2 weeks!",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
+      avatar: "https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=100&h=100&fit=crop"
     }
   ];
 

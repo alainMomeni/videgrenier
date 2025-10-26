@@ -13,8 +13,15 @@ type User = {
 
 type AuthContextType = {
   user: User | null;
+  setUser: (user: User | null) => void; // ✅ AJOUTÉ
   login: (credentials: { email: string; password: string }) => Promise<void>;
-  signup: (data: { firstName: string; lastName: string; email: string; password: string; userType: string }) => Promise<void>;
+  signup: (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    userType: string;
+  }) => Promise<void>;
   logout: () => void;
   loading: boolean;
 };
@@ -28,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    
+
     if (token && savedUser) {
       try {
         setUser(JSON.parse(savedUser));
@@ -44,20 +51,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (credentials: { email: string; password: string }) => {
     const response = await api.post('/auth/login', credentials);
     const { token, user: userData } = response.data;
-    
+
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
   };
 
-  const signup = async (data: { firstName: string; lastName: string; email: string; password: string; userType: string }) => {
+  const signup = async (data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    userType: string;
+  }) => {
     // ⚠️ NE PAS CONNECTER AUTOMATIQUEMENT L'UTILISATEUR
     const response = await api.post('/auth/register', data);
-    
+
     // Ne pas stocker le token ni connecter l'utilisateur
     // L'utilisateur devra se connecter APRÈS avoir vérifié son email
     console.log('✅ Signup successful:', response.data.message);
-    
+
     // Retourner la réponse sans connecter l'utilisateur
     return response.data;
   };
@@ -69,7 +82,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        setUser,  // ✅ AJOUTÉ
+        login, 
+        signup, 
+        logout, 
+        loading 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

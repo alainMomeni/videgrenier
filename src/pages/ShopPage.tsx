@@ -4,6 +4,7 @@ import { motion, type Variants } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { productAPI } from '../services/api';
+import { PRODUCT_CATEGORIES } from '../config/categories';
 import toast from 'react-hot-toast';
 
 const PRODUCTS_PER_PAGE = 6;
@@ -64,7 +65,9 @@ const ProductCard = ({ product }: { product: Product }) => (
       </div>
       <h3 className="text-lg font-serif text-[#2a363b] mt-4">{product.nom_produit}</h3>
       <div className="flex items-center justify-between mt-1">
-        <p className="text-md text-gray-700 font-semibold">${product.prix.toFixed(2)}</p>
+        <p className="text-md text-gray-700 font-semibold">
+          {product.prix.toLocaleString('fr-FR')} FCFA
+        </p>
         <span className="text-xs text-gray-500">{product.categorie}</span>
       </div>
     </motion.div>
@@ -110,8 +113,10 @@ const ShopPage = () => {
 
   // Extraire les catégories uniques depuis les produits
   const categories = useMemo(() => {
-    const uniqueCategories = new Set(products.map(p => p.categorie));
-    return ['All', ...Array.from(uniqueCategories)];
+    const productCategories = new Set(products.map(p => p.categorie));
+    // Filtrer PRODUCT_CATEGORIES pour ne garder que celles qui ont des produits
+    const usedCategories = PRODUCT_CATEGORIES.filter(cat => productCategories.has(cat));
+    return ['All', ...usedCategories];
   }, [products]);
 
   // Filtrage et tri des produits

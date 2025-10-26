@@ -1,7 +1,7 @@
 // frontend/src/pages/admin/AdminUsers.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, User as UserIcon, ChevronLeft, ChevronRight, Ban, ShieldCheck } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, User as UserIcon, ChevronLeft, ChevronRight, Ban, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { userAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import React from 'react';
@@ -19,7 +19,7 @@ type User = {
 type UserModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (user: Omit<User, 'id' | 'createdAt'>) => void;
+  onSave: (user: Omit<User, 'id' | 'createdAt'> & { password?: string }) => void;
   user: User | null;
 };
 
@@ -28,8 +28,10 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
     firstName: '', 
     lastName: '', 
     email: '', 
-    role: 'buyer' as 'buyer' | 'seller' | 'admin'
+    role: 'buyer' as 'buyer' | 'seller' | 'admin',
+    password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -37,10 +39,17 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
         firstName: user.firstName, 
         lastName: user.lastName, 
         email: user.email, 
-        role: user.role 
+        role: user.role,
+        password: '' // Vide par défaut lors de l'édition
       });
     } else {
-      setFormData({ firstName: '', lastName: '', email: '', role: 'buyer' });
+      setFormData({ 
+        firstName: '', 
+        lastName: '', 
+        email: '', 
+        role: 'buyer',
+        password: ''
+      });
     }
   }, [user, isOpen]);
 
@@ -51,6 +60,18 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Validation du mot de passe
+    if (!user && !formData.password) {
+      toast.error('Password is required for new users');
+      return;
+    }
+    
+    if (formData.password && formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    
     onSave(formData);
     onClose();
   };
@@ -73,7 +94,7 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label htmlFor="firstName" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
-                First Name
+                First Name *
               </label>
               <input 
                 type="text" 
@@ -81,13 +102,14 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
                 id="firstName" 
                 value={formData.firstName} 
                 onChange={handleChange} 
+                placeholder="John"
                 className={inputStyle} 
                 required
               />
             </div>
             <div>
               <label htmlFor="lastName" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
-                Last Name
+                Last Name *
               </label>
               <input 
                 type="text" 
@@ -95,6 +117,7 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
                 id="lastName" 
                 value={formData.lastName} 
                 onChange={handleChange} 
+                placeholder="Doe"
                 className={inputStyle} 
                 required
               />
@@ -102,7 +125,7 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
-              Email
+              Email *
             </label>
             <input 
               type="email" 
@@ -110,26 +133,57 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
               id="email" 
               value={formData.email} 
               onChange={handleChange} 
+              placeholder="john.doe@example.com"
               className={inputStyle} 
               required
             />
           </div>
           <div>
             <label htmlFor="role" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
-              Role
+              Role *
             </label>
             <select 
               name="role" 
               id="role" 
               value={formData.role} 
               onChange={handleChange} 
-              className={inputStyle + " appearance-none"} 
+              className={inputStyle} 
               required
             >
               <option value="buyer">Buyer</option>
               <option value="seller">Seller</option>
               <option value="admin">Admin</option>
             </select>
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-serif font-medium text-[#2a363b] mb-1">
+              Password {user ? '(Leave blank to keep current)' : '*'}
+            </label>
+            <div className="relative">
+              <input 
+                type={showPassword ? 'text' : 'password'}
+                name="password" 
+                id="password" 
+                value={formData.password} 
+                onChange={handleChange} 
+                placeholder={user ? 'Enter new password' : 'Enter password'}
+                className={inputStyle + ' pr-10'} 
+                required={!user}
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {user 
+                ? 'Leave empty to keep the current password' 
+                : 'Minimum 6 characters'}
+            </p>
           </div>
           <div className="flex justify-end gap-4 pt-4 border-t border-[#dcd6c9]">
             <button 
@@ -143,7 +197,7 @@ const UserModal = ({ isOpen, onClose, onSave, user }: UserModalProps) => {
               type="submit" 
               className="px-4 sm:px-6 py-2 text-sm font-serif text-white bg-[#2a363b] rounded-md hover:bg-opacity-90 transition"
             >
-              Save User
+              {user ? 'Update User' : 'Create User'}
             </button>
           </div>
         </form>
@@ -213,27 +267,45 @@ const AdminUsers = () => {
     setIsModalOpen(false);
   };
 
-  const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
+  const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt'> & { password?: string }) => {
     try {
       if (editingUser) {
         // Mise à jour
-        await userAPI.update(editingUser.id, {
+        const updateData: any = {
           first_name: userData.firstName,
           last_name: userData.lastName,
           email: userData.email,
           role: userData.role
-        });
+        };
+        
+        // Ajouter le mot de passe seulement s'il est fourni
+        if (userData.password && userData.password.trim() !== '') {
+          updateData.password = userData.password;
+        }
+        
+        await userAPI.update(editingUser.id, updateData);
         toast.success('User updated successfully');
       } else {
-        // Note: La création d'utilisateur passe normalement par /api/auth/register
-        // Vous pouvez soit ajouter une route spéciale pour les admins, soit rediriger vers signup
-        toast.error('User creation not implemented. Please use the signup page.');
-        return;
+        // Création
+        if (!userData.password) {
+          toast.error('Password is required for new users');
+          return;
+        }
+        
+        await userAPI.create({
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          email: userData.email,
+          password: userData.password,
+          role: userData.role
+        });
+        toast.success('User created successfully. They can now log in.');
       }
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving user:', error);
-      toast.error('Failed to save user');
+      const errorMessage = error.response?.data?.message || 'Failed to save user';
+      toast.error(errorMessage);
     }
   };
 
@@ -288,7 +360,7 @@ const AdminUsers = () => {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 sm:mb-8 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#2a363b]">Manage Users</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">View, edit, or remove users from your platform.</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Create, edit, or remove users from your platform.</p>
         </div>
         <button 
           onClick={() => handleOpenModal()} 

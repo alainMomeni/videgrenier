@@ -2,7 +2,7 @@
 import AdminSupply from '../admin/AdminSupply';
 
 const SellerSupply = () => {
-  return <AdminSupply isSellerView={true} />;
+  return <AdminSupply {...({ isSellerView: true } as any)} />;
 };
 
 export default SellerSupply;

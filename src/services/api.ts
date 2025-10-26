@@ -42,6 +42,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // ✅ GÉRER LES ERREURS D'AUTHENTIFICATION (401)
+    if (error.response?.status === 401 && error.response?.data?.requiresAuth) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      toast.error('Please login to continue', {
+        duration: 4000,
+      });
+      
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1500);
+      
+      return Promise.reject(error);
+    }
+    
     // Gérer les comptes bloqués
     if (error.response?.status === 403 && error.response?.data?.blocked) {
       localStorage.removeItem('token');
@@ -115,7 +131,6 @@ const normalizeSupply = (supply: any) => ({
   ...supply,
   id_supply: Number(supply.id_supply),
   id_produit: Number(supply.id_produit),
-  id_fournisseur: Number(supply.id_fournisseur),
   id_user: Number(supply.id_user),
   quantite: Number(supply.quantite),
   prix_unitaire: Number(supply.prix_unitaire),
@@ -133,6 +148,10 @@ const normalizeReview = (review: any) => ({
 const normalizeUser = (user: any) => ({
   ...user,
   id: Number(user.id),
+  firstName: user.first_name,
+  lastName: user.last_name,
+  email: user.email,
+  role: user.role,
   isBlocked: Boolean(user.is_blocked),
   createdAt: user.created_at,
 });
@@ -173,7 +192,16 @@ export const uploadProductImage = async (file: File): Promise<string> => {
 
 export const productAPI = {
   getAll: async (userId?: number) => {
-    const response = await api.get('/products', { params: userId ? { userId } : {} });
+    console.log('🔍 ========================================');
+    console.log('🔍 API CALL: GET ALL PRODUCTS');
+    console.log('🔍 User ID param:', userId);
+    
+    // ✅ CORRECTION ICI : Utiliser id_user au lieu de userId
+    const params = userId ? { id_user: userId } : {};
+    console.log('📝 Request params:', params);
+    console.log('🔍 ========================================');
+    
+    const response = await api.get('/products', { params });
     return {
       ...response,
       data: response.data.map(normalizeProduct)
@@ -217,7 +245,7 @@ export const stockAPI = {
 };
 
 // ============================================
-// API SUPPLIES
+// API SUPPLIES (Sans fournisseurs)
 // ============================================
 
 export const supplyAPI = {
@@ -230,8 +258,6 @@ export const supplyAPI = {
       data: response.data.map(normalizeSupply)
     };
   },
-  
-  getSuppliers: () => api.get('/supplies/suppliers'),
   
   create: (data: any) => api.post('/supplies', data),
   
@@ -263,16 +289,18 @@ export const salesAPI = {
   
   create: (data: any) => api.post('/sales', data),
   
+  // ✅ SIMPLIFIÉ : Plus besoin de buyer_name et buyer_email
   createBulk: (data: {
     items: Array<{ id_produit: number; quantity: number }>;
-    buyer_name: string;
-    buyer_email: string;
     payment_method: string;
     shipping_address?: string;
   }) => api.post('/sales/bulk', data),
   
   updateStatus: (id: number, status: string) => 
     api.put(`/sales/${id}/status`, { status }),
+  
+  // ✅ AJOUT DE LA MÉTHODE DELETE
+  delete: (id: number) => api.delete(`/sales/${id}`),
 };
 
 // ============================================
@@ -321,11 +349,31 @@ export const userAPI = {
     };
   },
   
-  update: async (id: number, data: any) => {
+  create: async (data: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    password: string;
+    role: string;
+  }) => {
+    const response = await api.post('/users', data);
+    return {
+      ...response,
+      data: normalizeUser(response.data.user)
+    };
+  },
+  
+  update: async (id: number, data: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+    password?: string;
+  }) => {
     const response = await api.put(`/users/${id}`, data);
     return {
       ...response,
-      data: normalizeUser(response.data)
+      data: normalizeUser(response.data.user)
     };
   },
   
@@ -369,6 +417,31 @@ export const newsletterAPI = {
     api.delete(`/newsletters/${id}?permanent=${permanent}`),
   
   reactivate: (id: number) => api.put(`/newsletters/${id}/reactivate`),
+};
+
+// ============================================
+// API CONTACT
+// ============================================
+
+export const contactAPI = {
+  submit: (data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) => api.post('/contact/submit', data),
+};
+
+// ============================================
+// API AUTH (Password Reset)
+// ============================================
+
+export const authAPI = {
+  forgotPassword: (email: string) => 
+    api.post('/auth/forgot-password', { email }),
+  
+  resetPassword: (data: { token: string; newPassword: string }) => 
+    api.post('/auth/reset-password', data),
 };
 
 export default api;
