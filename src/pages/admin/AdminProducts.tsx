@@ -126,15 +126,6 @@ const ProductModal = ({ isOpen, onClose, onSave, product, isSaving }: ProductMod
         </h2>
 
         {/* ✅ LOADER OVERLAY */}
-        {isSaving && (
-          <div className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center rounded-lg z-10">
-            <Loader className="animate-spin h-12 w-12 text-[#2a363b] mb-4" />
-            <p className="text-lg font-serif text-[#2a363b] mb-2">
-              {imageFile ? 'Uploading image...' : 'Saving product...'}
-            </p>
-            <p className="text-sm text-gray-600">Please wait, this may take a moment</p>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Photo Upload */}
